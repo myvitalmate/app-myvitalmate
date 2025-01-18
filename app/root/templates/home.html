@@ -9,9 +9,32 @@
     <input type="submit" value="Enter">
 </form>
 
-{% if response %}
-    <h3>Antwort vom Ernährungsberater:</h3>
-    <p>{{ response }}</p>
+{% if ai_response %}
+<h3>Antwort vom Ernährungsberater:</h3>
+<p>{{ ai_response }}</p>
+{% endif %}
+
+<form method="get">
+    <input type="text" name="search_recipe_by_name" placeholder="Search for a recipe"/>
+    <button type="submit">Search</button>
+</form>
+
+{% if extracted_recipes %}
+<h2>Search Results:</h2>
+<ul>
+    {% for recipe in extracted_recipes %}
+    <li>
+        <a href="{% url 'recipe_instructions' recipe.id %}">
+            <strong>{{ recipe.title }}</strong><br>
+        </a>
+        <a href="{% url 'recipe_instructions' recipe.id %}">
+            <img src="{{ recipe.image }}" alt="{{ recipe.title }}" style="width: 200px; height: auto;"><br>
+        </a>
+    </li>
+    {% endfor %}
+</ul>
+{% else %}
+<p>No recipes found. Try searching for something else!</p>
 {% endif %}
 
 {% endblock %}
