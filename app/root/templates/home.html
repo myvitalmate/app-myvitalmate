@@ -1,13 +1,17 @@
 {% extends "base.html" %}
-{% block title %} Home Page {% endblock %}
+{% block title %} Mate {% endblock %}
 {% block content %}
 
-<form method="post" action="">
+<form method="post" action="{% url 'home' %}">
     {% csrf_token %}
     <label for="user_input">Gib deinen Text ein:</label><br>
     <input type="text" id="user_input" name="user_input" placeholder="Schreibe hier etwas..." required><br><br>
     <input type="submit" value="Enter">
 </form>
 
+{% if response %}
+    <h3>Antwort vom Ernährungsberater:</h3>
+    <p>{{ response }}</p>
+{% endif %}
 
 {% endblock %}
