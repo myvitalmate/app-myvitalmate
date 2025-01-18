@@ -2,10 +2,10 @@
 {% block title %} Mate {% endblock %}
 {% block content %}
 
-<form method="post" action="{% url 'home' %}">
+<form action="{% url 'home' %}" method="post">
     {% csrf_token %}
     <label for="user_input">Gib deinen Text ein:</label><br>
-    <input type="text" id="user_input" name="user_input" placeholder="Schreibe hier etwas..." required><br><br>
+    <input id="user_input" name="user_input" placeholder="Schreibe hier etwas..." required type="text"><br><br>
     <input type="submit" value="Enter">
 </form>
 
@@ -15,7 +15,7 @@
 {% endif %}
 
 <form method="get">
-    <input type="text" name="search_recipe_by_name" placeholder="Search for a recipe"/>
+    <input name="search_recipe_by_name" placeholder="Search for a recipe" type="text"/>
     <button type="submit">Search</button>
 </form>
 
@@ -28,7 +28,7 @@
             <strong>{{ recipe.title }}</strong><br>
         </a>
         <a href="{% url 'recipe_instructions' recipe.id %}">
-            <img src="{{ recipe.image }}" alt="{{ recipe.title }}" style="width: 200px; height: auto;"><br>
+            <img alt="{{ recipe.title }}" src="{{ recipe.image }}" style="width: 200px; height: auto;"><br>
         </a>
     </li>
     {% endfor %}
