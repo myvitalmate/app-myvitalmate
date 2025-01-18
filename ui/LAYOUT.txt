@@ -1,0 +1,100 @@
+src/
+    ├── assets/                     # Static assets (images, icons, fonts, etc.)
+        ├── images/
+        ├── icons/
+        └── fonts/
+
+    ├── components/                 # Reusable UI components
+        ├── buttons/                # Button components
+        ├── forms/                  # Form components (e.g., user data input)
+        ├── charts/                 # Visualization components (e.g., blood pressure graphs)
+        └── recipes/                # Recipe-related components
+            ├── RecipeCard.tsx
+            └── RecipeList.tsx
+
+    ├── contexts/                   # Context API files for global state
+        ├── UserProfileContext.tsx
+        └── ThemeContext.tsx
+
+    ├── hooks/                      # Custom React hooks
+        ├── useFetch.ts             # Data fetching logic
+        ├── useUserProfile.ts       # Hook for user profile state
+        └── useBloodPressure.ts     # Hook for blood pressure data
+
+    ├── layouts/                    # Reusable layout components and navigation
+        ├── MainLayout.tsx          # Main app layout
+        ├── AuthLayout.tsx          # Authentication layout
+        ├── DashboardLayout.tsx     # Dashboard layout
+        └── navigation/             # Navigation components
+            ├── NavBar.tsx          # Main navigation bar
+            ├── NavBar.module.css   # NavBar styles
+            └── NavLink.tsx         # Reusable navigation link component
+
+    ├── pages/                      # Page-specific components for routes
+        ├── Home/                   # Home page
+        │   ├── HomePage.tsx
+        │   ├── Home.module.css
+        │   └── index.ts
+        ├── Profile/                # User profile page
+        │   ├── ProfilePage.tsx
+        │   ├── Profile.module.css
+        │   └── index.ts
+        ├── HealthData/             # Health data input and visualization page
+        │   ├── HealthDataPage.tsx
+        │   ├── HealthData.module.css
+        │   └── index.ts
+        └── NutritionPlan/          # Nutrition plan page
+            ├── NutritionPlanPage.tsx
+            ├── NutritionPlan.module.css
+            └── index.ts
+
+    ├── services/                   # API calls and external integrations
+        ├── api/                    # API service files
+        │   ├── userService.ts      # Handles user-related API requests
+        │   ├── aiService.ts        # AI-based processing
+        │   └── nutritionService.ts # Nutrition-related API calls
+        └── external/               # External integrations
+            ├── openaiIntegration.ts
+            ├── guidelinesAPI.ts
+            └── recipeAPI.ts
+
+    ├── state/                      # Centralized state management (e.g., Redux)
+        ├── userProfileSlice.ts
+        ├── bloodPressureSlice.ts
+        └── nutritionSlice.ts
+
+    ├── styles/                     # Global styles and CSS variables
+        ├── variables.css
+        ├── themes.css
+        └── global.css
+
+    ├── utils/                      # Utility functions and helpers
+        ├── dataProcessing/         # Data processing logic
+        │   ├── calculateNutrition.ts
+        │   ├── evaluateHabits.ts
+        │   └── generateTherapyPlan.ts
+        ├── validation/             # Input validation logic
+        │   ├── validateInput.ts
+        │   ├── validateBloodPressure.ts
+        │   └── validateUserProfile.ts
+        └── formatters/             # Formatting helpers
+            ├── formatDate.ts
+            └── formatNumber.ts
+
+    ├── types/                      # TypeScript types and interfaces
+        ├── UserProfile.ts
+        ├── NutritionPlan.ts
+        ├── BloodPressure.ts
+        └── ExerciseProfile.ts
+
+    ├── data/                       # Mock data, constants, and configuration
+        ├── mockRecipes.ts
+        ├── bloodPressureGuidelines.json
+        └── nutritionGuidelines.json
+
+    ├── app/                        # App-level configuration and components
+        ├── App.tsx                 # Root app component
+        ├── Router.tsx              # React Router setup
+        └── ErrorBoundary.tsx       # Error boundary component
+
+    └── index.tsx                   # App entry point
