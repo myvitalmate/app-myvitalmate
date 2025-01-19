@@ -1,0 +1,40 @@
+app/
+│──core/
+│  ├── __init__.py
+│  ├── urls.py
+│  ├── wsgi.py
+│  ├── asgi.py
+│  └── settings.py
+│
+│──root/
+│  ├── views/
+│  │   ├── chat/
+│  │   │   ├── __init__.py
+│  │   │   ├── message_views.py
+│  │   │   └── other_chat_views.py  # Optional for future chat-related views
+│  │   ├── recipe/
+│  │   │   ├── __init__.py
+│  │   │   ├── search_views.py
+│  │   │   └── other_recipe_views.py  # Optional for future recipe-related views
+│  │   ├── __init__.py
+│  ├── serializers/
+│  │   ├── chat/
+│  │   │   ├── __init__.py
+│  │   │   ├── message_serializers.py
+│  │   ├── recipe/
+│  │   │   ├── __init__.py
+│  │   │   ├── search_serializers.py
+│  │   └── __init__.py
+│  ├── urls/
+│  │   ├── chat_urls.py
+│  │   ├── recipe_urls.py
+│  │   └── __init__.py
+│  ├── models.py
+│  ├── admin.py
+│  ├── apps.py
+│  ├── tests/
+│  │   ├── test_chat/
+│  │   ├── test_recipe/
+│  └── __init__.py
+
+
