@@ -1,22 +1,22 @@
 app/
-│──core/
+│── core/
 │  ├── __init__.py
-│  ├── urls.py
+│  ├── urls.py                # Main project URLs file
 │  ├── wsgi.py
 │  ├── asgi.py
-│  └── settings.py
+│  └── settings.py            # Core settings
 │
-│──root/
+│── root/
 │  ├── views/
-│  │   ├── chat/
+│  │   ├── chat/              # Chat-related views
 │  │   │   ├── __init__.py
 │  │   │   ├── message_views.py
-│  │   │   └── other_chat_views.py  # Optional for future chat-related views
-│  │   ├── recipe/
+│  │   │   └── other_chat_views.py
+│  │   ├── recipe/            # Recipe-related views
 │  │   │   ├── __init__.py
 │  │   │   ├── search_views.py
-│  │   │   └── other_recipe_views.py  # Optional for future recipe-related views
-│  │   ├── __init__.py
+│  │   │   └── other_recipe_views.py
+│  │   └── __init__.py        # Root-level view imports
 │  ├── serializers/
 │  │   ├── chat/
 │  │   │   ├── __init__.py
@@ -26,15 +26,20 @@ app/
 │  │   │   ├── search_serializers.py
 │  │   └── __init__.py
 │  ├── urls/
-│  │   ├── chat_urls.py
-│  │   ├── recipe_urls.py
-│  │   └── __init__.py
-│  ├── models.py
+│  │   ├── chat_urls.py       # Chat-specific URLs
+│  │   ├── recipe_urls.py     # Recipe-specific URLs
+│  │   └── __init__.py        # Root-level URL imports
+│  ├── models/                # Models should be moved here
+│  │   ├── __init__.py        # Import all models here
+│  │   ├── chat.py            # Chat-related models
+│  │   └── recipe.py          # Recipe-related models
+│  ├── services/              # Services folder for logic
+│  │   ├── __init__.py
+│  │   ├── chat_service.py    # Business logic related to chat
+│  │   └── recipe_service.py  # Business logic related to recipe
 │  ├── admin.py
 │  ├── apps.py
 │  ├── tests/
-│  │   ├── test_chat/
-│  │   ├── test_recipe/
+│  │   ├── test_chat/         # Chat-related tests
+│  │   ├── test_recipe/       # Recipe-related tests
 │  └── __init__.py
-
-
