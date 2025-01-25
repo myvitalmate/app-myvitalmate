@@ -1,5 +1,5 @@
 <component name="ProjectRunConfigurationManager">
-  <configuration default="false" name="myvitalmate" type="PythonConfigurationType" factoryName="Python">
+  <configuration default="false" name="django app" type="PythonConfigurationType" factoryName="Python">
     <module name="app-myvitalmate" />
     <option name="ENV_FILES" value="" />
     <option name="INTERPRETER_OPTIONS" value="" />
