@@ -2,11 +2,13 @@ import {BrowserRouter, Route, Routes} from "react-router-dom";
 import MainLayout from "./layouts/MainLayout";
 import Home from "./pages/Home/HomePage.tsx";
 import About from "./pages/About/About.tsx";
+import ChatPage from "./pages/Chat/ChatPage.tsx";
 
 // Define routes in an object format
 const routes = [
     {path: '/', element: <Home/>},
     {path: '/about', element: <About/>},
+    {path: '/chat', element: <ChatPage/>},
 ];
 
 const App = () => {

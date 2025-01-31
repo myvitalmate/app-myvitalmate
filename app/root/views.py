@@ -1,7 +1,7 @@
 from django.http import JsonResponse
 from django.shortcuts import render
 
-from .ai_chatbot import parse_user_input
+from root.services.chat_service import parse_user_input
 from .recipes_search import get_recipe_by_name, get_recipe_instructions_by_id
 
 
