@@ -21,6 +21,11 @@ const NavBar = () => {
                         Chat
                     </Link>
                 </li>
+                <li>
+                    <Link to="/recipes" className={styles.link}>
+                        Recipes
+                    </Link>
+                </li>
             </ul>
         </nav>
     );

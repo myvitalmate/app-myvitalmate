@@ -39,7 +39,7 @@ class ChatService:
         if model_name == "gpt":
             cls._model_instance = OpenAI(model="gpt-3.5-turbo-instruct", api_key=api_key)
         else:
-            cls._model_instance = OllamaLLM(model="llama3.2")
+            cls._model_instance = OllamaLLM(model="llama3")
 
         cls._current_model_name = model_name
         return cls._model_instance
