@@ -9,7 +9,6 @@ import RecipesPage from "./pages/Recipes/RecipesPage.tsx";
 const routes = [
     {path: '/', element: <Home/>},
     {path: '/about', element: <About/>},
-    {path: '/chat', element: <ChatPage/>},
     {path: '/recipes', element: <RecipesPage/>}
 ];
 
