@@ -16,6 +16,16 @@ const NavBar = () => {
                         About
                     </Link>
                 </li>
+                <li>
+                    <Link to="/chat" className={styles.link}>
+                        Chat
+                    </Link>
+                </li>
+                <li>
+                    <Link to="/recipes" className={styles.link}>
+                        Recipes
+                    </Link>
+                </li>
             </ul>
         </nav>
     );
