@@ -60,14 +60,67 @@ def get_recipe_instructions_by_id(recipe_id):
     }
 
     try:
-        # Make the API call
         response = requests.get(base_url + endpoint, params=params)
         response.raise_for_status()
-
-        # Parse JSON response
         instructions = response.json()
-        return instructions
+
+        extracted_instructions = []
+        for instruction in instructions:
+            for step in instruction.get('steps', []):
+                extracted_instructions.append({
+                    "number": step.get("number"),
+                    "step": step.get("step")
+                })
+
+        return extracted_instructions
 
     except requests.exceptions.RequestException as e:
-        print(f"An error occurred: {e}")
-        return {"error": str(e)}
+        print(f"Error while fetching recipe instructions: {e}")
+        return None
+
+def round_ingredient_amount(amount, unit):
+    if unit == "g":
+        if amount >= 1000:
+            return round(amount / 1000, 1)
+        else:
+            return round(amount / 10) * 10
+    else:
+        return amount
+
+def get_recipe_ingredients_by_id(recipe_id):
+
+    if not spoonacular_API_KEY:
+        raise ValueError("API key not found. Please set it in the .env file.")
+
+    endpoint = f"/recipes/{recipe_id}/ingredientWidget.json"
+    params = {
+        "apiKey": spoonacular_API_KEY
+    }
+
+    try:
+        response = requests.get(base_url + endpoint, params=params)
+        response.raise_for_status()
+        ingredients = response.json()
+
+        extract_ingredients = []
+        for ingredient in ingredients.get("ingredients", []):
+            amount = ingredient.get("amount", {}).get("metric", {}).get("value", "N/A")
+            amount_unit = ingredient.get("amount", {}).get("metric", {}).get("unit", "N/A")
+
+            try:
+                amount = float(amount)
+                amount = round_ingredient_amount(amount, amount_unit)
+            except ValueError:
+                pass
+
+            extract_ingredients.append({
+                "name": ingredient.get("name"),
+                "amount": amount,
+                "amount_unit": amount_unit,
+            })
+
+        return extract_ingredients
+
+    except requests.exceptions.RequestException as e:
+        print(f"Error while fetching recipe ingredients: {e}")
+        return None
