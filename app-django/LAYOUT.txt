@@ -1,4 +1,4 @@
-app/
+app-django/
 │── core/
 │  ├── __init__.py
 │  ├── urls.py                # Main project URLs file
