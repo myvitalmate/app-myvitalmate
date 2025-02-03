@@ -1,11 +1,11 @@
 <component name="ProjectRunConfigurationManager">
   <configuration default="false" name="mvm spring" type="Application" factoryName="Application">
-    <option name="MAIN_CLASS_NAME" value="com.myvitalmate.app_spring.AppSpringApplication" />
+    <option name="MAIN_CLASS_NAME" value="com.myvitalmate.app.AppSpringApplication" />
     <module name="app-spring.main" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/app-spring" />
     <extension name="coverage">
       <pattern>
-        <option name="PATTERN" value="com.myvitalmate.app_spring.*" />
+        <option name="PATTERN" value="com.myvitalmate.app.*" />
         <option name="ENABLED" value="true" />
       </pattern>
     </extension>
