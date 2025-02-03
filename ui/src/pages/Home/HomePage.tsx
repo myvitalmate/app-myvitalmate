@@ -2,31 +2,31 @@ import {useState} from "react";
 
 const BASE_URL = 'http://127.0.0.1:8000';
 
-export const fetchRecipes = async (searchQuery: string) => {
-    const response = await fetch(`${BASE_URL}/recipe/search/?query=${encodeURIComponent(searchQuery)}`);
+export const fetchResponse = async (searchQuery: string) => {
+    const response = await fetch(`${BASE_URL}/health/check/?query=${encodeURIComponent(searchQuery)}`);
     const data = await response.json();
-    return data.recipes;
+    return data.healthResponse;
 };
 
 const Home = () => {
     const [searchQuery, setSearchQuery] = useState('');
     const [result, setResult] = useState('');
 
-    const handleSearch = async () => {
-        const recipes = await fetchRecipes(searchQuery);
-        setResult(recipes);
+    const handleBackendCall = async () => {
+        const response = await fetchResponse(searchQuery);
+        setResult(response);
     };
 
     return (
         <div>
-            <h1>Recipe Search</h1>
+            <h1>Welcome to My Vital Mate</h1>
             <input
                 type="text"
                 value={searchQuery}
                 onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Enter a recipe name..."
+                placeholder="Test backend"
             />
-            <button onClick={handleSearch}>Search</button>
+            <button onClick={handleBackendCall}>Search</button>
             <p>{result}</p>
         </div>
     );
