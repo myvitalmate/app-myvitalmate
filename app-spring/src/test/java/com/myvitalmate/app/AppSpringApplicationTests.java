@@ -1,4 +1,4 @@
-package com.myvitalmate.app_spring;
+package com.myvitalmate.app;
 
 import org.junit.jupiter.api.Test;
 import org.springframework.boot.test.context.SpringBootTest;
