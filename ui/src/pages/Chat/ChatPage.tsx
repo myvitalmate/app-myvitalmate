@@ -3,7 +3,9 @@ import {useState} from 'react';
 interface ChatPageProps {
     // Define any props here if needed in the future
 }
-const BASE_URL = 'http://127.0.0.1:8000';
+
+// const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = 'http://localhost:8080';
 
 export const sendMessage = async (message: string, model: string) => {
     const response = await fetch(`${BASE_URL}/chat/message/`, {
@@ -17,8 +19,8 @@ export const sendMessage = async (message: string, model: string) => {
         }),
     });
 
-    const data = await response.json();
-    return data.response;
+    const data = await response.text(); //before it was response.json
+    return data;
 };
 
 const ChatPage: React.FC<ChatPageProps> = () => {
@@ -51,25 +53,25 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     return (
         <div>
             {/* Scrollable container for answers */}
-            <div style={{ height: '400px', overflowY: 'scroll', border: '1px solid #ccc', padding: '10px' }}>
+            <div style={{height: '400px', overflowY: 'scroll', border: '1px solid #ccc', padding: '10px'}}>
                 {history.map((historyEntry, index) => (
                     <div key={index}>{historyEntry}</div>
                 ))}
             </div>
 
             {/* User input field */}
-            <div style={{ marginTop: '10px' }}>
+            <div style={{marginTop: '10px'}}>
         <textarea
             value={userInput}
             onChange={handleInputChange}
             placeholder="Type your message"
             rows={3}
-            style={{ width: '100%' }}
+            style={{width: '100%'}}
         />
             </div>
 
             {/* Send button */}
-            <div style={{ marginTop: '10px' }}>
+            <div style={{marginTop: '10px'}}>
                 <button onClick={handleSend}>Send</button>
             </div>
 
@@ -77,7 +79,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
             <select
                 value={selectedModel}
                 onChange={handleModelChange}
-                style={{ marginLeft: '10px', padding: '5px' }}
+                style={{marginLeft: '10px', padding: '5px'}}
             >
                 <option value="gpt">GPT</option>
                 <option value="llama">Llama</option>
