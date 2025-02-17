@@ -9,6 +9,7 @@ load_dotenv()
 # Spoonacular API settings
 base_url = "https://api.spoonacular.com"
 search_recipes_by_name = "/recipes/complexSearch"
+search_recipes_by_id = "/recipes/:id/analyzedInstructions?stepBreakdown=true&apiKey="
 spoonacular_API_KEY = os.getenv("spoonacular_API_KEY")
 
 
