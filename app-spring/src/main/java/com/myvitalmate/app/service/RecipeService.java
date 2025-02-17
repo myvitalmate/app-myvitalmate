@@ -26,7 +26,7 @@ public class RecipeService {
 
     private final RestTemplate restTemplate;
     private final String base_url = "https://api.spoonacular.com";
-    @Value("${spoonacular_API_KEY}")
+    @Value("${spoonacular.api.key}")
     private String apiKey;
 
     public RecipeService(RestTemplate restTemplate) {
