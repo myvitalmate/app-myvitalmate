@@ -1,11 +1,10 @@
-import React, {useState} from 'react';
+import React, { useState } from 'react';
 import '../../styles/container.css';
 import '../../styles/searchbar.css';
 import '../../styles/results.css';
 import '../../styles/instructions.css';
 
-//const BASE_URL = 'http://127.0.0.1:8000';
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = 'http://127.0.0.1:8000';
 
 const RecipesPage = () => {
     const [query, setQuery] = useState('');
@@ -94,25 +93,25 @@ const RecipesPage = () => {
                 </form>
             </div>
 
-            {error && <p style={{color: 'red'}}>{error}</p>}
+            {error && <p style={{ color: 'red' }}>{error}</p>}
 
             <div className="results">
                 <h3>Results:</h3>
-                <ul>
-                    {recipes.map((recipe) => (
-                        <li key={recipe.id}>
-                            <a
-                                href="#"
-                                onClick={(e) => handleSelectedRecipe(e, recipe.id)}>
-                                <h3>{recipe.title}</h3>
-                                <img
-                                    src={recipe.image}
-                                    alt={`Image of ${recipe.name}`} // Improved accessibility
-                                />
-                            </a>
-                        </li>
-                    ))}
-                </ul>
+                    <ul>
+                        {recipes.map((recipe) => (
+                            <li key={recipe.id}>
+                                <a
+                                    href="#"
+                                    onClick={(e) => handleSelectedRecipe(e, recipe.id)}>
+                                    <h3>{recipe.title}</h3>
+                                    <img
+                                        src={recipe.image}
+                                        alt={`Image of ${recipe.name}`} // Improved accessibility
+                                    />
+                                </a>
+                            </li>
+                        ))}
+                    </ul>
             </div>
             <div className="instructions">
                 <h3>Recipe Details</h3>

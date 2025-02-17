@@ -16,7 +16,7 @@ public class HealthController {
 	public ResponseEntity<HealthResponseDto> getHealthCheck(@RequestParam String query) {
 
 		HealthResponseDto response = new HealthResponseDto(
-				"Spring Boot service is running smoothly. Search query received: " + query);
+				"Service is running smoothly. Search query received: " + query);
 
 		return ResponseEntity.ok(response);
 	}
