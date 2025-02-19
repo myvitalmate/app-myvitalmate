@@ -21,16 +21,16 @@ const Home = () => {
     };
 
     return (
-        <div>
+        <div className="flex flex-col w-full max-w-sm items-center space-y-4 mx-auto">
             <h1>Welcome to My Vital Mate</h1>
-            <div className="flex w-full max-w-sm items-center space-x-2 mx-auto">
+            <div className="flex w-full items-center space-x-2">
                 <Input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Test backend"
                 />
-                <Button onClick={handleBackendCall}>Search</Button>
+                <Button variant={"default"} onClick={handleBackendCall}>Search</Button>
             </div>
             <p>{result}</p>
         </div>
