@@ -11,6 +11,7 @@ public class OpenAIConfig {
     @Value("${openai.api.url}")
     private String apiUrl;
 
+    //TODO only use RestClient or RestTemplate.
     @Bean
     public RestClient restClient() {
         return RestClient.builder()

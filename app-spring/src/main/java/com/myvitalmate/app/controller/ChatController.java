@@ -20,6 +20,7 @@ public class ChatController {
         this.chatService = chatService;
     }
 
+    //TODO return json. not string
     @PostMapping
     public String chat(@RequestBody PromptRequest request) {
         return chatService.getChatResponse(request);

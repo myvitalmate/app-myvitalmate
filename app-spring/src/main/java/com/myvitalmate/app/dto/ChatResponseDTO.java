@@ -4,6 +4,7 @@ import java.util.List;
 
 public record ChatResponseDTO(List<Choice> choices, String llamaResponse) {
 
+    //TODO create interface for seperation of concern. Abstract class -> more scaleable.
     public String getFirstMessageContent() {
         // If GPT response exists, return the first choice
         if (choices != null && !choices.isEmpty() && choices.get(0).message() != null) {
