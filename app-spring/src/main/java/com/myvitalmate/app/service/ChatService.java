@@ -48,7 +48,7 @@ public class ChatService {
         );
 
         ChatResponseDTO responseDTO;
-
+        //TODO Service request into sperated services -> scaleable abstrct classes?
         if ("gpt".equalsIgnoreCase(request.model())) {
             // OpenAI GPT Response Handling
             ChatResponseDTO gptResponse = restClient.post()
