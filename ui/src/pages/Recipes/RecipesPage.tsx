@@ -1,8 +1,4 @@
 import React, {useState} from 'react';
-import '../../styles/container.css';
-import '../../styles/searchbar.css';
-import '../../styles/results.css';
-import '../../styles/instructions.css';
 
 //const BASE_URL = 'http://127.0.0.1:8000';
 const BASE_URL = 'http://localhost:8080';

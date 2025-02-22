@@ -9,7 +9,7 @@ const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
     return (
         <div>
             <Navbar/>
-            <main className="pt-4 pl-4 pr-4">{children}</main>
+            <main>{children}</main>
         </div>
     );
 };
