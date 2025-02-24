@@ -19,8 +19,8 @@ export const sendMessage = async (message: string, model: string) => {
         }),
     });
 
-    const data = await response.text(); //before it was response.json
-    return data;
+    const data = await response.json();
+    return data.message;
 };
 
 const ChatPage: React.FC<ChatPageProps> = () => {

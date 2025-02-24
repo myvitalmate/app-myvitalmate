@@ -1,8 +1,9 @@
 package com.myvitalmate.app.controller;
 
-import com.myvitalmate.app.dto.PromptRequest;
-import com.myvitalmate.app.service.ChatService;
-import org.springframework.ai.chat.model.ChatModel;
+import com.myvitalmate.app.dto.ChatPromptRequest;
+import com.myvitalmate.app.dto.ChatResponseDTO;
+import com.myvitalmate.app.service.AIChatService;
+import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestBody;
 import org.springframework.web.bind.annotation.RequestMapping;
@@ -12,17 +13,15 @@ import org.springframework.web.bind.annotation.RestController;
 @RequestMapping("/chat/message/")
 public class ChatController {
 
-    private final ChatModel chatModel;
-    private final ChatService chatService;
+    private final AIChatService aiChatService;
 
-    public ChatController(ChatModel chatModel, ChatService chatService) {
-        this.chatModel = chatModel;
-        this.chatService = chatService;
+    public ChatController(AIChatService aiChatService) {
+        this.aiChatService = aiChatService;
     }
 
-    //TODO return json. not string
     @PostMapping
-    public String chat(@RequestBody PromptRequest request) {
-        return chatService.getChatResponse(request);
+    public ResponseEntity<ChatResponseDTO> chatResponse(@RequestBody ChatPromptRequest request) {
+        ChatResponseDTO response = aiChatService.getChatResponse(request.model(), request.message());
+        return ResponseEntity.ok(response);  // Return response as JSON
     }
 }
