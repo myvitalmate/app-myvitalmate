@@ -1,4 +1,4 @@
-package com.myvitalmate.app.dto;
+package com.myvitalmate.app.recipe.dto;
 
 public record RecipeIngredientsDTO(
         String name,

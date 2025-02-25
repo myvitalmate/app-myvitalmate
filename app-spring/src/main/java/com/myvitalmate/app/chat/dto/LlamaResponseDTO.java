@@ -1,8 +1,6 @@
-package com.myvitalmate.app.dto;
+package com.myvitalmate.app.chat.dto;
 
-import com.myvitalmate.app.interfaces.AiChatResponseInterface;
-
-public record LlamaResponseDTO(String llamaResponse) implements AiChatResponseInterface {
+public record LlamaResponseDTO(String llamaResponse) implements IChatResponseDTO {
 
     @Override
     public String getResponse() {
