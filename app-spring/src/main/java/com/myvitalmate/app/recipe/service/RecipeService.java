@@ -1,9 +1,12 @@
-package com.myvitalmate.app.service;
+package com.myvitalmate.app.recipe.service;
 
-import com.myvitalmate.app.dto.RecipeIngredientsDTO;
-import com.myvitalmate.app.dto.RecipeInstructionsDTO;
-import com.myvitalmate.app.dto.RecipeResponseDTO;
-import com.myvitalmate.app.dto.RecipeResultsDTO;
+import com.myvitalmate.app.recipe.dto.RecipeIngredientsDTO;
+import com.myvitalmate.app.recipe.dto.RecipeInstructionsDTO;
+import com.myvitalmate.app.recipe.dto.RecipeResponseDTO;
+import com.myvitalmate.app.recipe.dto.RecipeResultsDTO;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.context.annotation.PropertySource;
 import org.springframework.core.ParameterizedTypeReference;
@@ -24,28 +27,24 @@ import java.util.stream.Collectors;
 @PropertySource("classpath:APIs.properties")
 public class RecipeService {
 
-    private final RestTemplate restTemplate;
+    private static final Logger logger = LoggerFactory.getLogger(RecipeService.class);
     private final String base_url = "https://api.spoonacular.com";
+    @Autowired
+    private RestTemplate restTemplate;
     @Value("${spoonacular.api.key}")
     private String apiKey;
-
-    public RecipeService(RestTemplate restTemplate) {
-        this.restTemplate = restTemplate;
-    }
 
     public List<RecipeResultsDTO> getRecipesByName(String searchRecipeByName) {
         if (apiKey == null || apiKey.isEmpty()) {
             throw new IllegalArgumentException("API key not found. Please set it in the APIs.properties file.");
         }
 
-        // Build the API request URL
-        String url = UriComponentsBuilder.fromHttpUrl(base_url + "/recipes/complexSearch")
+        String url = UriComponentsBuilder.fromUriString(base_url + "/recipes/complexSearch")
                 .queryParam("query", searchRecipeByName)
                 .queryParam("apiKey", apiKey)
                 .toUriString();
 
         try {
-            // Send GET request and parse the response
             ResponseEntity<RecipeResponseDTO> responseEntity = restTemplate.exchange(
                     url,
                     HttpMethod.GET,
@@ -56,12 +55,10 @@ public class RecipeService {
 
             RecipeResponseDTO recipeResponseDTO = responseEntity.getBody();
 
-            // Ensure results list is not null
             if (recipeResponseDTO == null || recipeResponseDTO.results() == null) {
                 return List.of();
             }
 
-            // Convert each map in the results list to a RecipeResultsDTO
             return recipeResponseDTO.results().stream()
                     .map(result -> new RecipeResultsDTO(
                             result.id(),
@@ -71,14 +68,12 @@ public class RecipeService {
                     .collect(Collectors.toList());
 
         } catch (RestClientException e) {
-            // Handle API request failures
-            System.err.println("API request failed: " + e.getMessage());
+            logger.error("API request failed: {}", e.getMessage());
         } catch (Exception e) {
-            // Handle unexpected exceptions
-            System.err.println("An unexpected error occurred: " + e.getMessage());
+            logger.error("An unexpected error occurred: {}", e.getMessage());
         }
 
-        return List.of(); // Return an empty list if an error occurs
+        return List.of();
     }
 
     public List<RecipeInstructionsDTO> getRecipeInstructionsById(int searchRecipeById) {
@@ -86,13 +81,11 @@ public class RecipeService {
             throw new IllegalArgumentException("API key not found. Please set it in the APIs.properties file.");
         }
 
-        // Construct the API URL
-        String url = UriComponentsBuilder.fromHttpUrl(base_url + "/recipes/" + searchRecipeById + "/analyzedInstructions")
+        String url = UriComponentsBuilder.fromUriString(base_url + "/recipes/" + searchRecipeById + "/analyzedInstructions")
                 .queryParam("apiKey", apiKey)
                 .toUriString();
 
         try {
-            //every instructionList object represents a recipe
             List<Map<String, Object>> instructionsList = restTemplate.getForObject(url, List.class);
 
             List<RecipeInstructionsDTO> extractedInstructions = new ArrayList<>();
@@ -123,18 +116,18 @@ public class RecipeService {
     private double roundIngredientAmount(double amount, String unit) {
         if ("g".equalsIgnoreCase(unit)) {
             if (amount >= 1000) {
-                return Math.round((amount / 1000) * 10.0) / 10.0; // Convert to kg with 1 decimal place
+                return Math.round((amount / 1000) * 10.0) / 10.0;
             } else {
-                return Math.round(amount / 10) * 10; // Round to nearest 10g
+                return Math.round(amount / 10) * 10;
             }
         } else if ("ml".equalsIgnoreCase(unit)) {
             if (amount >= 1000) {
-                return Math.round((amount / 1000) * 10.0) / 10.0; // Convert to L with 1 decimal place
+                return Math.round((amount / 1000) * 10.0) / 10.0;
             } else {
-                return Math.round(amount / 10) * 10; // Round to nearest 10ml
+                return Math.round(amount / 10) * 10;
             }
         }
-        return amount; // Return unmodified for other units
+        return amount;
     }
 
     private String normalizeUnit(double amount, String unit) {
@@ -151,8 +144,7 @@ public class RecipeService {
             throw new IllegalArgumentException("API key not found. Please set it in the APIs.properties file.");
         }
 
-        // Construct API URL
-        String url = UriComponentsBuilder.fromHttpUrl(base_url + "/recipes/" + searchRecipeById + "/ingredientWidget.json")
+        String url = UriComponentsBuilder.fromUriString(base_url + "/recipes/" + searchRecipeById + "/ingredientWidget.json")
                 .queryParam("apiKey", apiKey)
                 .toUriString();
 
@@ -166,7 +158,6 @@ public class RecipeService {
                 for (Map<String, Object> ingredient : ingredientsList) {
                     String name = (String) ingredient.get("name");
 
-                    // Extract amount and unit safely
                     Map<String, Object> amountMap = (ingredient.get("amount") instanceof Map)
                             ? (Map<String, Object>) ingredient.get("amount")
                             : Collections.emptyMap();
@@ -181,11 +172,9 @@ public class RecipeService {
                             ? (String) metric.get("unit")
                             : "N/A";
 
-                    // Apply rounding and unit normalization
                     amount = roundIngredientAmount(amount, amountUnit);
                     amountUnit = normalizeUnit(amount, amountUnit);
 
-                    // Add to DTO list
                     extractedIngredients.add(new RecipeIngredientsDTO(name, amount, amountUnit));
                 }
             }

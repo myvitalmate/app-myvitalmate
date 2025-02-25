@@ -1,4 +1,4 @@
-package com.myvitalmate.app.dto;
+package com.myvitalmate.app.chat.dto;
 
 import java.util.List;
 

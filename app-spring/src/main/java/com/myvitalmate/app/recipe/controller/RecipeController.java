@@ -1,9 +1,9 @@
-package com.myvitalmate.app.controller;
+package com.myvitalmate.app.recipe.controller;
 
-import com.myvitalmate.app.dto.RecipeIngredientsDTO;
-import com.myvitalmate.app.dto.RecipeInstructionsDTO;
-import com.myvitalmate.app.dto.RecipeResultsDTO;
-import com.myvitalmate.app.service.RecipeService;
+import com.myvitalmate.app.recipe.dto.RecipeIngredientsDTO;
+import com.myvitalmate.app.recipe.dto.RecipeInstructionsDTO;
+import com.myvitalmate.app.recipe.dto.RecipeResultsDTO;
+import com.myvitalmate.app.recipe.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.GetMapping;
