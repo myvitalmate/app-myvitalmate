@@ -11,7 +11,8 @@ interface ChatPageProps {
     // Define any props here if needed in the future
 }
 
-const BASE_URL = 'http://127.0.0.1:8000';
+// const BASE_URL = 'http://127.0.0.1:8000';
+const BASE_URL = 'http://localhost:8080';
 
 export const sendMessage = async (message: string, model: string) => {
     const response = await fetch(`${BASE_URL}/chat/message/`, {
@@ -26,7 +27,7 @@ export const sendMessage = async (message: string, model: string) => {
     });
 
     const data = await response.json();
-    return data.response;
+    return data.message;
 };
 
 interface ChatMessage {
