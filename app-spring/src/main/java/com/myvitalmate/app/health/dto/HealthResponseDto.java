@@ -1,4 +1,4 @@
-package com.myvitalmate.app.dto;
+package com.myvitalmate.app.health.dto;
 
 public record HealthResponseDto(String healthResponse) {
 }
