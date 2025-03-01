@@ -1,4 +1,4 @@
-import {KeyboardEvent, useState} from 'react';
+import {KeyboardEvent, useEffect, useRef, useState} from 'react';
 import {Button} from "@/components/ui/button"
 import {Textarea} from "@/components/ui/textarea"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
@@ -37,6 +37,7 @@ const ChatPage: React.FC<ChatPageProps> = () => {
     const [userInput, setUserInput] = useState<string>('');
     const [selectedModel, setSelectedModel] = useState<string>('llama');
     const [history, setHistory] = useState<ChatMessage[]>([]);
+    const scrollAreaRef = useRef<HTMLDivElement>(null);
 
     const handleInputChange = (e: React.ChangeEvent<HTMLTextAreaElement>) => {
         setUserInput(e.target.value);
@@ -66,14 +67,20 @@ const ChatPage: React.FC<ChatPageProps> = () => {
         setSelectedModel(value);
     };
 
+    useEffect(() => {
+        if (scrollAreaRef.current) {
+            scrollAreaRef.current.scrollTop = scrollAreaRef.current.scrollHeight;
+        }
+    }, [history]);
+
     return (
-        <div className="flex items-center justify-center min-h-screen bg-gray-100">
+        <div className="flex items-center justify-center mt-10">
             <Card className="w-full max-w-2xl">
                 <CardHeader>
                     <CardTitle>Chat with AI</CardTitle>
                 </CardHeader>
                 <CardContent>
-                    <ScrollArea className="h-[400px] w-full pr-4">
+                    <ScrollArea ref={scrollAreaRef} className="h-[400px] w-full pr-4">
                         {history.map((message, index) => (
                             <div key={index} className={`mb-4 ${message.isUser ? 'text-right' : 'text-left'}`}>
                                 <span
@@ -109,5 +116,4 @@ const ChatPage: React.FC<ChatPageProps> = () => {
         </div>
     );
 };
-
 export default ChatPage;
