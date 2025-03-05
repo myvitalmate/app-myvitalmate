@@ -48,7 +48,6 @@ public class GPTChatService implements ChatService {
 
         HttpHeaders headers = new HttpHeaders();
         headers.set("Authorization", "Bearer " + apiKey);
-        headers.set("Content-Type", "application/json");
 
         HttpEntity<ChatRequestDTO> entity = new HttpEntity<>(chatRequestDTO, headers);
 

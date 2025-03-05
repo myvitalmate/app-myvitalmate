@@ -26,6 +26,11 @@ const NavBar = () => {
                         About
                     </Link>
                 </li>
+                <li>
+                    <Link to="/login" className={styles.link}>
+                        Login
+                    </Link>
+                </li>
             </ul>
         </nav>
     );
