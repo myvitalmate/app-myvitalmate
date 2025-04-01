@@ -1,4 +1,4 @@
-package com.myvitalmate.app.registration.dto;
+package com.myvitalmate.app.userProfile.dto;
 
 public record ContactDTO(
         String phoneNumber,
