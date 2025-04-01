@@ -1,4 +1,4 @@
-package com.myvitalmate.app.registration.entity;
+package com.myvitalmate.app.userProfile.entity;
 
 import jakarta.persistence.Embeddable;
 

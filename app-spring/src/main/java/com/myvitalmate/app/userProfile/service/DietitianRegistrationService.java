@@ -1,11 +1,11 @@
-package com.myvitalmate.app.registration.service;
+package com.myvitalmate.app.userProfile.service;
 
-import com.myvitalmate.app.registration.dto.DietitianRegistrationDTO;
-import com.myvitalmate.app.registration.entity.Adresse;
-import com.myvitalmate.app.registration.entity.Contact;
-import com.myvitalmate.app.registration.entity.DietitianProfile;
-import com.myvitalmate.app.registration.entity.Name;
-import com.myvitalmate.app.registration.repository.DietitianProfileRepository;
+import com.myvitalmate.app.userProfile.dto.DietitianRegistrationDTO;
+import com.myvitalmate.app.userProfile.entity.Adresse;
+import com.myvitalmate.app.userProfile.entity.Contact;
+import com.myvitalmate.app.userProfile.entity.DietitianProfile;
+import com.myvitalmate.app.userProfile.entity.Name;
+import com.myvitalmate.app.userProfile.repository.DietitianProfileRepository;
 import org.springframework.stereotype.Service;
 
 @Service

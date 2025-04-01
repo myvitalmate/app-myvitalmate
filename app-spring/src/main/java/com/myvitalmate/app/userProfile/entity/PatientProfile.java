@@ -1,8 +1,7 @@
-package com.myvitalmate.app.registration.entity;
+package com.myvitalmate.app.userProfile.entity;
 
+import com.myvitalmate.app.userProfile.dto.PatientRegistrationDTO;
 import jakarta.persistence.*;
-
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "Patient")
@@ -17,14 +16,15 @@ public class PatientProfile extends Profile {
     private String goals;
     private String sickness;
 
-    public PatientProfile(Name name, Contact contact, Adresse adresse,
-                          LocalDate birthday, String gender, String photoUrl,
-                          String dietOrientation, String currentWeight, String goals, String sickness) {
-        super(name, adresse, contact, birthday, gender, photoUrl);
-        this.dietOrientation = dietOrientation;
-        this.currentWeight = currentWeight;
-        this.goals = goals;
-        this.sickness = sickness;
+    public PatientProfile(PatientRegistrationDTO dto) {
+        Name name = new Name(dto.name().firstName(), dto.name().lastName());
+        Contact contact = new Contact(dto.contact().phoneNumber(), dto.contact().email());
+        Adresse adresse = new Adresse(dto.adresse().street(), dto.adresse().city(), dto.adresse().postalCode(), dto.adresse().country());
+        super(name, adresse, contact, dto.birthday(), dto.gender(), dto.photoUrl());
+        this.dietOrientation = dto.dietOrientation();
+        this.currentWeight = dto.currentWeight();
+        this.goals = dto.goals();
+        this.sickness = dto.sickness();
     }
 
     public Long getId() {

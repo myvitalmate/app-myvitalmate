@@ -1,8 +1,8 @@
-package com.myvitalmate.app.registration.controller;
+package com.myvitalmate.app.userProfile.controller;
 
-import com.myvitalmate.app.registration.dto.DietitianRegistrationDTO;
-import com.myvitalmate.app.registration.entity.DietitianProfile;
-import com.myvitalmate.app.registration.service.DietitianRegistrationService;
+import com.myvitalmate.app.userProfile.dto.DietitianRegistrationDTO;
+import com.myvitalmate.app.userProfile.entity.DietitianProfile;
+import com.myvitalmate.app.userProfile.service.DietitianRegistrationService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
