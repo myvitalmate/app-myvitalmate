@@ -14,22 +14,30 @@ public class DietitianService {
     @Autowired
     private ValidationService validationService;
 
-    public DietitianProfile registerDietitian(DietitianRegistrationDTO dietitianRegistrationDTO) {
+    public DietitianProfile registerDietitian(DietitianRegistrationDTO dto) {
 
-        validationService.validateFirstName(dietitianRegistrationDTO.firstName(), "First Name");
-        validationService.validateLastName(dietitianRegistrationDTO.lastName(), "Last Name");
-        validationService.validateCity(dietitianRegistrationDTO.adresse().city());
-        validationService.validateStreet(dietitianRegistrationDTO.adresse().street());
-        validationService.validateCountry(dietitianRegistrationDTO.adresse().country());
-        validationService.validatePostalcode(dietitianRegistrationDTO.adresse().postalCode());
-        validationService.validateEmail(dietitianRegistrationDTO.contact().email());
-        validationService.validatePhoneNumber(dietitianRegistrationDTO.contact().phoneNumber());
-        validationService.validateGender(dietitianRegistrationDTO.gender());
-        validationService.validateBirthday(dietitianRegistrationDTO.birthday());
+        validationService.validateFirstName(dto.firstName(), "First Name");
+        validationService.validateLastName(dto.lastName(), "Last Name");
+        validationService.validateCity(dto.adresse().city());
+        validationService.validateStreet(dto.adresse().street());
+        validationService.validateCountry(dto.adresse().country());
+        validationService.validatePostalcode(dto.adresse().postalCode());
+        validationService.validateEmail(dto.contact().email());
+        validationService.validatePhoneNumber(dto.contact().phoneNumber());
+        validationService.validateGender(dto.gender());
+        validationService.validateBirthday(dto.birthday());
 
-        validationService.validateSpecialty(dietitianRegistrationDTO.specialty());
+        validationService.validateSpecialty(dto.specialty());
 
-        DietitianProfile dietitianProfile = new DietitianProfile(dietitianRegistrationDTO);
+        if (repository.existingContactData(
+                dto.contact().email(),
+                dto.contact().phoneNumber()
+        )) {
+            throw new ValidationException("A profile with the same email, phone number, or address already exists.");
+        }
+
+
+        DietitianProfile dietitianProfile = new DietitianProfile(dto);
         return repository.save(dietitianProfile);
     }
 }
