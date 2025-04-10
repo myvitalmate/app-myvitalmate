@@ -22,13 +22,13 @@ const NavBar = () => {
                     </Link>
                 </li>
                 <li>
-                    <Link to="/about" className={styles.link}>
-                        About
+                    <Link to="/registration" className={styles.link}>
+                        Registration
                     </Link>
                 </li>
                 <li>
-                    <Link to="/registration" className={styles.link}>
-                        Registration
+                    <Link to="/about" className={styles.link}>
+                        About
                     </Link>
                 </li>
             </ul>
