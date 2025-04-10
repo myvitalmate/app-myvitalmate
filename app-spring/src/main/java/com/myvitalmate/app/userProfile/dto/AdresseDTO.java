@@ -4,5 +4,6 @@ public record AdresseDTO(
         String street,
         String city,
         String postalCode,
-        String country) {
+        String country
+) {
 }

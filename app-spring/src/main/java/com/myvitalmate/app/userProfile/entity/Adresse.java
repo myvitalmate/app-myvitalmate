@@ -1,5 +1,6 @@
 package com.myvitalmate.app.userProfile.entity;
 
+import com.myvitalmate.app.userProfile.dto.AdresseDTO;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
@@ -13,11 +14,11 @@ public class Adresse {
     public Adresse() {
     }
 
-    public Adresse(String street, String city, String postalCode, String country) {
-        this.street = street;
-        this.city = city;
-        this.postalCode = postalCode;
-        this.country = country;
+    public Adresse(AdresseDTO dto) {
+        this.street = dto.street();
+        this.city = dto.city();
+        this.postalCode = dto.postalCode();
+        this.country = dto.country();
     }
 
     public String getStreet() {

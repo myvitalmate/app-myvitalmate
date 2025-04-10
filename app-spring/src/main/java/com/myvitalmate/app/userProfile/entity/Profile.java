@@ -17,23 +17,13 @@ public abstract class Profile {
 
     private LocalDate birthday;
     private String gender;
-    private String photoUrl;
 
-    public Profile(Name name, Adresse adresse, Contact contact, LocalDate birthday, String gender, String photoUrl) {
+    public Profile(Name name, Adresse adresse, Contact contact, LocalDate birthday, String gender) {
         this.name = name;
         this.adresse = adresse;
         this.contact = contact;
-        this.photoUrl = photoUrl;
         this.birthday = birthday;
         this.gender = gender;
-    }
-
-    public String getPhotoUrl() {
-        return photoUrl;
-    }
-
-    public void setPhotoUrl(String photoUrl) {
-        this.photoUrl = photoUrl;
     }
 
     public Name getName() {

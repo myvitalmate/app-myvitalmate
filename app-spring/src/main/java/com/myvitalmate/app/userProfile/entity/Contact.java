@@ -1,5 +1,6 @@
 package com.myvitalmate.app.userProfile.entity;
 
+import com.myvitalmate.app.userProfile.dto.ContactDTO;
 import jakarta.persistence.Embeddable;
 
 @Embeddable
@@ -11,9 +12,9 @@ public class Contact {
     public Contact() {
     }
 
-    public Contact(String phoneNumber, String email) {
-        this.phoneNumber = phoneNumber;
-        this.email = email;
+    public Contact(ContactDTO dto) {
+        this.phoneNumber = dto.phoneNumber();
+        this.email = dto.email();
     }
 
     public String getEmail() {

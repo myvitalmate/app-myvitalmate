@@ -34,7 +34,7 @@ public class RecipeService {
 
     public List<RecipeResultsDTO> getRecipesByName(String searchRecipeByName) {
         if (apiKey == null || apiKey.isEmpty()) {
-            throw new IllegalArgumentException("API key not found. Please set it in the APIs.properties file.");
+            throw new IllegalArgumentException("API key not found. Please set it in the customApplication.properties file.");
         }
 
         String url = UriComponentsBuilder.fromUriString(base_url + "/recipes/complexSearch")
@@ -76,7 +76,7 @@ public class RecipeService {
 
     public List<RecipeInstructionsDTO> getRecipeInstructionsById(int searchRecipeById) {
         if (apiKey == null || apiKey.isEmpty()) {
-            throw new IllegalArgumentException("API key not found. Please set it in the APIs.properties file.");
+            throw new IllegalArgumentException("API key not found. Please set it in the customApplication.properties file.");
         }
 
         String url = UriComponentsBuilder.fromUriString(base_url + "/recipes/" + searchRecipeById + "/analyzedInstructions")
@@ -139,7 +139,7 @@ public class RecipeService {
 
     public List<RecipeIngredientsDTO> getRecipeIngredientsById(int searchRecipeById) {
         if (apiKey == null || apiKey.isEmpty()) {
-            throw new IllegalArgumentException("API key not found. Please set it in the APIs.properties file.");
+            throw new IllegalArgumentException("API key not found. Please set it in the customApplication.properties file.");
         }
 
         String url = UriComponentsBuilder.fromUriString(base_url + "/recipes/" + searchRecipeById + "/ingredientWidget.json")

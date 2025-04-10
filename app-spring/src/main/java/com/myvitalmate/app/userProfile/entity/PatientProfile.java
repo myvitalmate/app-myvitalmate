@@ -17,10 +17,11 @@ public class PatientProfile extends Profile {
     private String sickness;
 
     public PatientProfile(PatientRegistrationDTO dto) {
-        Name name = new Name(dto.name().firstName(), dto.name().lastName());
-        Contact contact = new Contact(dto.contact().phoneNumber(), dto.contact().email());
-        Adresse adresse = new Adresse(dto.adresse().street(), dto.adresse().city(), dto.adresse().postalCode(), dto.adresse().country());
-        super(name, adresse, contact, dto.birthday(), dto.gender(), dto.photoUrl());
+        super(new Name(dto.firstName(), dto.lastName()),
+                new Adresse(dto.adresse()),
+                new Contact(dto.contact()),
+                dto.birthday(),
+                dto.gender());
         this.dietOrientation = dto.dietOrientation();
         this.currentWeight = dto.currentWeight();
         this.goals = dto.goals();

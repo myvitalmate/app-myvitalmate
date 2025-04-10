@@ -13,6 +13,7 @@ type FormData = {
     birthday: string;
     photoUrl: string;
     street: string;
+    country: string;
     city: string;
     postalCode: string;
     specialty?: string; // Only for dietitians
@@ -34,6 +35,7 @@ const Registration = () => {
         birthday: "",
         photoUrl: "",
         street: "",
+        country: "",
         city: "",
         postalCode: "",
         specialty: "",
@@ -76,6 +78,7 @@ const Registration = () => {
             birthday: "",
             photoUrl: "",
             street: "",
+            country: "",
             city: "",
             postalCode: "",
             specialty: newUserType === "dietitian" ? "" : undefined,
@@ -90,10 +93,23 @@ const Registration = () => {
         e.preventDefault();
 
         const userDTO = {
-            name: {
-                firstName: formData.firstName,
-                lastName: formData.lastName
-            },
+            firstName: formData.firstName,
+            lastName: formData.lastName,
+            gender: formData.gender,
+            birthday: formData.birthday,
+            photoUrl: formData.photoUrl,
+
+            // Top-level contact fields
+            phoneNumber: formData.phoneNumber,
+            email: formData.email,
+
+            // Top-level address fields
+            street: formData.street,
+            city: formData.city,
+            postalCode: formData.postalCode,
+            country: formData.country,
+
+            // Nested DTOs
             contact: {
                 phoneNumber: formData.phoneNumber,
                 email: formData.email
@@ -101,12 +117,13 @@ const Registration = () => {
             adresse: {
                 street: formData.street,
                 city: formData.city,
-                postalCode: formData.postalCode
+                postalCode: formData.postalCode,
+                country: formData.country
             },
-            gender: formData.gender,
-            photoUrl: formData.photoUrl,
-            birthday: formData.birthday,
-            ...(userType === "dietitian" && {specialty: formData.specialty}),
+
+            ...(userType === "dietitian" && {
+                specialty: formData.specialty
+            }),
             ...(userType === "patient" && {
                 dietOrientation: formData.dietOrientation,
                 currentWeight: formData.currentWeight,
@@ -116,7 +133,7 @@ const Registration = () => {
         };
 
         try {
-            const response = await fetch(`${BASE_URL}/${userType}s/register`, {
+            const response = await fetch(`${BASE_URL}/${userType}s/create`, {
                 method: "POST",
                 headers: {
                     "Content-Type": "application/json"
@@ -134,6 +151,7 @@ const Registration = () => {
             setResponseMessage("Network error. Please try again.");
         }
     };
+
 
     return (
         <div>
@@ -185,8 +203,8 @@ const Registration = () => {
                        required/>
                 <input type="text" name="postalCode" placeholder="Postal Code" value={formData.postalCode}
                        onChange={handleChange} required/>
-                <input type="text" name="photoUrl" placeholder="Photo URL" value={formData.photoUrl}
-                       onChange={handleChange}/>
+                <input type="text" name="country" placeholder="Country" value={formData.country}
+                       onChange={handleChange} required/>
 
                 <button type="submit">Register</button>
             </form>

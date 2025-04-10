@@ -1,8 +1,7 @@
 package com.myvitalmate.app.userProfile.controller;
 
 import com.myvitalmate.app.userProfile.dto.PatientRegistrationDTO;
-import com.myvitalmate.app.userProfile.entity.PatientProfile;
-import com.myvitalmate.app.userProfile.service.PatientRegistrationService;
+import com.myvitalmate.app.userProfile.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.PostMapping;
@@ -12,14 +11,14 @@ import org.springframework.web.bind.annotation.RestController;
 
 @RestController
 @RequestMapping("/patients")
-public class PatientRegistrationController {
+public class PatientController {
 
     @Autowired
-    private PatientRegistrationService patientRegistrationService;
+    private PatientService patientService;
 
-    @PostMapping("/register")
+    @PostMapping("/create")
     public ResponseEntity<Void> registerPatient(@RequestBody PatientRegistrationDTO patientRegistrationDto) {
-        PatientProfile registeredPatient = patientRegistrationService.registerPatient(patientRegistrationDto);
+        patientService.registerPatient(patientRegistrationDto);
         return ResponseEntity.ok().build();
     }
 }

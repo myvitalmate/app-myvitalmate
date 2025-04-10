@@ -1,8 +1,7 @@
 package com.myvitalmate.app.userProfile.entity;
 
+import com.myvitalmate.app.userProfile.dto.DietitianRegistrationDTO;
 import jakarta.persistence.*;
-
-import java.time.LocalDate;
 
 @Entity
 @Table(name = "Dietitian")
@@ -14,12 +13,13 @@ public class DietitianProfile extends Profile {
 
     private String specialty;
 
-    public DietitianProfile(Name name, Contact contact, Adresse adresse,
-                            LocalDate birthday, String gender, String photoUrl,
-                            String specialty) {
-        super(name, adresse, contact, birthday, gender, photoUrl);
-
-        this.specialty = specialty;
+    public DietitianProfile(DietitianRegistrationDTO dto) {
+        super(new Name(dto.firstName(), dto.lastName()),
+                new Adresse(dto.adresse()),
+                new Contact(dto.contact()),
+                dto.birthday(),
+                dto.gender());
+        this.specialty = dto.specialty();
     }
 
     public Long getId() {
