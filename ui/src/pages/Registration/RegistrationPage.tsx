@@ -99,17 +99,15 @@ const Registration = () => {
             birthday: formData.birthday,
             photoUrl: formData.photoUrl,
 
-            // Top-level contact fields
             phoneNumber: formData.phoneNumber,
             email: formData.email,
 
-            // Top-level address fields
+
             street: formData.street,
             city: formData.city,
             postalCode: formData.postalCode,
             country: formData.country,
 
-            // Nested DTOs
             contact: {
                 phoneNumber: formData.phoneNumber,
                 email: formData.email

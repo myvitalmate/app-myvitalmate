@@ -15,25 +15,31 @@ public class PatientService {
     private ValidationService validationService;
 
 
-    public PatientProfile registerPatient(PatientRegistrationDTO patientsRegistrationDto) {
+    public PatientProfile registerPatient(PatientRegistrationDTO dto) {
 
-        validationService.validateLastName(patientsRegistrationDto.lastName(), "Last Name");
-        validationService.validateCity(patientsRegistrationDto.adresse().city());
-        validationService.validateStreet(patientsRegistrationDto.adresse().street());
-        validationService.validateCountry(patientsRegistrationDto.adresse().country());
-        validationService.validatePostalcode(patientsRegistrationDto.adresse().postalCode());
-        validationService.validateEmail(patientsRegistrationDto.contact().email());
-        validationService.validatePhoneNumber(patientsRegistrationDto.contact().phoneNumber());
-        validationService.validateGender(patientsRegistrationDto.gender());
-        validationService.validateBirthday(patientsRegistrationDto.birthday());
+        validationService.validateLastName(dto.lastName(), "Last Name");
+        validationService.validateCity(dto.adresse().city());
+        validationService.validateStreet(dto.adresse().street());
+        validationService.validateCountry(dto.adresse().country());
+        validationService.validatePostalcode(dto.adresse().postalCode());
+        validationService.validateEmail(dto.contact().email());
+        validationService.validatePhoneNumber(dto.contact().phoneNumber());
+        validationService.validateGender(dto.gender());
+        validationService.validateBirthday(dto.birthday());
 
-        validationService.validateDietOrientation(patientsRegistrationDto.dietOrientation());
-        validationService.validateCurrentWeight(patientsRegistrationDto.currentWeight());
-        validationService.validateSickness(patientsRegistrationDto.sickness());
-        validationService.validateGoals(patientsRegistrationDto.goals());
+        validationService.validateDietOrientation(dto.dietOrientation());
+        validationService.validateCurrentWeight(dto.currentWeight());
+        validationService.validateSickness(dto.sickness());
+        validationService.validateGoals(dto.goals());
 
+        if (repository.existingContactData(
+                dto.contact().email(),
+                dto.contact().phoneNumber()
+        )) {
+            throw new ValidationException("A profile with the same email, phone number, or address already exists.");
+        }
 
-        PatientProfile patient = new PatientProfile(patientsRegistrationDto);
+        PatientProfile patient = new PatientProfile(dto);
         return repository.save(patient);
     }
 }
