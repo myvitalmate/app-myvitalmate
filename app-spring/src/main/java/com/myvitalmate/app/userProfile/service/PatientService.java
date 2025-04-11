@@ -1,0 +1,45 @@
+package com.myvitalmate.app.userProfile.service;
+
+import com.myvitalmate.app.userProfile.dto.PatientRegistrationDTO;
+import com.myvitalmate.app.userProfile.entity.PatientProfile;
+import com.myvitalmate.app.userProfile.repository.PatientProfileRepository;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.stereotype.Service;
+
+@Service
+public class PatientService {
+
+    @Autowired
+    private PatientProfileRepository repository;
+    @Autowired
+    private ValidationService validationService;
+
+
+    public PatientProfile registerPatient(PatientRegistrationDTO dto) {
+
+        validationService.validateLastName(dto.lastName(), "Last Name");
+        validationService.validateCity(dto.adresse().city());
+        validationService.validateStreet(dto.adresse().street());
+        validationService.validateCountry(dto.adresse().country());
+        validationService.validatePostalcode(dto.adresse().postalCode());
+        validationService.validateEmail(dto.contact().email());
+        validationService.validatePhoneNumber(dto.contact().phoneNumber());
+        validationService.validateGender(dto.gender());
+        validationService.validateBirthday(dto.birthday());
+
+        validationService.validateDietOrientation(dto.dietOrientation());
+        validationService.validateCurrentWeight(dto.currentWeight());
+        validationService.validateSickness(dto.sickness());
+        validationService.validateGoals(dto.goals());
+
+        if (repository.existingContactData(
+                dto.contact().email(),
+                dto.contact().phoneNumber()
+        )) {
+            throw new ValidationException("A profile with the same email, phone number, or address already exists.");
+        }
+
+        PatientProfile patient = new PatientProfile(dto);
+        return repository.save(patient);
+    }
+}
