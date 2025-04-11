@@ -139,11 +139,18 @@ const Registration = () => {
                 body: JSON.stringify(userDTO)
             });
 
-            const data = await response.json();
             if (response.ok) {
                 setResponseMessage("Registration successful!");
             } else {
-                setResponseMessage(`Error: ${data.message || "Something went wrong"}`);
+                const contentType = response.headers.get("content-type");
+                let errorMessage = "Something went wrong";
+
+                if (contentType && contentType.includes("application/json")) {
+                    const data = await response.json();
+                    errorMessage = `Error: ${data.message || errorMessage}`;
+                }
+
+                setResponseMessage(errorMessage);
             }
         } catch (error) {
             setResponseMessage("Network error. Please try again.");
