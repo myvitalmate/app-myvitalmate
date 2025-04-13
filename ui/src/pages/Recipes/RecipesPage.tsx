@@ -121,7 +121,7 @@ const RecipesPage = () => {
                             </div>
                         )}
 
-                        <ScrollArea className="h-[500px] mt-4">
+                        <ScrollArea className="h-[500px] mt-4 pr-4">
                             <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                                 {recipes.map((recipe) => (
                                     <Card
@@ -150,42 +150,44 @@ const RecipesPage = () => {
                         <CardTitle>Recipe Details</CardTitle>
                     </CardHeader>
                     <CardContent>
-                        <ScrollArea className="h-[600px]">
-                            {selectedRecipeInstructions.length > 0 ? (
-                                <div className="space-y-6">
-                                    <div>
-                                        <h4 className="text-lg font-semibold mb-2">Instructions</h4>
-                                        <ol className="space-y-2">
-                                            {selectedRecipeInstructions.map((instruction) => (
-                                                <li key={instruction.number} className="flex gap-2">
-                                                    <span className="font-medium">{instruction.number}.</span>
-                                                    <span>{instruction.step}</span>
-                                                </li>
-                                            ))}
-                                        </ol>
-                                    </div>
-
-                                    {selectedRecipeIngredients.length > 0 && (
+                        <ScrollArea className="h-[600px] pr-4">
+                            <div className="pr-2">
+                                {selectedRecipeInstructions.length > 0 ? (
+                                    <div className="space-y-6">
                                         <div>
-                                            <h4 className="text-lg font-semibold mb-2">Ingredients</h4>
-                                            <ul className="space-y-2">
-                                                {selectedRecipeIngredients.map((ingredient, index) => (
-                                                    <li key={index} className="flex justify-between items-center">
-                                                        <span className="font-medium">{ingredient.name}</span>
-                                                        <span className="text-muted-foreground">
-                                                            {ingredient.amount} {ingredient.amount_unit}
-                                                        </span>
+                                            <h4 className="text-lg font-semibold mb-2">Instructions</h4>
+                                            <ol className="space-y-2">
+                                                {selectedRecipeInstructions.map((instruction) => (
+                                                    <li key={instruction.number} className="flex gap-2">
+                                                        <span className="font-medium">{instruction.number}.</span>
+                                                        <span>{instruction.step}</span>
                                                     </li>
                                                 ))}
-                                            </ul>
+                                            </ol>
                                         </div>
-                                    )}
-                                </div>
-                            ) : (
-                                <div className="text-center text-muted-foreground py-8">
-                                    Select a recipe to view instructions and ingredients
-                                </div>
-                            )}
+
+                                        {selectedRecipeIngredients.length > 0 && (
+                                            <div>
+                                                <h4 className="text-lg font-semibold mb-2">Ingredients</h4>
+                                                <ul className="space-y-2">
+                                                    {selectedRecipeIngredients.map((ingredient, index) => (
+                                                        <li key={index} className="flex justify-between items-center">
+                                                            <span className="font-medium">{ingredient.name}</span>
+                                                            <span className="text-muted-foreground">
+                                                                {ingredient.amount} {ingredient.amount_unit}
+                                                            </span>
+                                                        </li>
+                                                    ))}
+                                                </ul>
+                                            </div>
+                                        )}
+                                    </div>
+                                ) : (
+                                    <div className="text-center text-muted-foreground py-8">
+                                        Select a recipe to view instructions and ingredients
+                                    </div>
+                                )}
+                            </div>
                         </ScrollArea>
                     </CardContent>
                 </Card>
