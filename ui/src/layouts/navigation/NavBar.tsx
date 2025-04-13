@@ -1,12 +1,11 @@
-"use client"
-
 import {Link} from "react-router-dom";
 
-export default function Navbar() {
+export default function NavBar() {
     const navigation = [
         {name: "Home", href: "/"},
         {name: "Chat", href: "/chat"},
         {name: "Recipes", href: "/recipes"},
+        {name: "Registration", href: "/registration"},
         {name: "About", href: "/about"},
     ]
 
