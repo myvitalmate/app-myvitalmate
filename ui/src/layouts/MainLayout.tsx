@@ -1,5 +1,5 @@
 import React from "react";
-import Navbar from "@/layouts/navigation/Navbar.tsx";
+import NavBar from "@/layouts/navigation/NavBar.tsx";
 
 interface MainLayoutProps {
     children: React.ReactNode;
@@ -8,7 +8,7 @@ interface MainLayoutProps {
 const MainLayout: React.FC<MainLayoutProps> = ({children}) => {
     return (
         <div className="grid grid-rows-[64px_1fr] h-screen bg-gray-100">
-            <Navbar/>
+            <NavBar/>
             <main className="overflow-y-auto">{children}</main>
         </div>
     );
