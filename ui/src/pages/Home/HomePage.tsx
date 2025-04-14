@@ -1,4 +1,6 @@
 import {useState} from "react";
+import {Button} from "@/components/ui/button.tsx";
+import {Input} from "@/components/ui/input.tsx";
 
 //const BASE_URL = 'http://127.0.0.1:8000';
 const BASE_URL = 'http://localhost:8080';
@@ -19,15 +21,17 @@ const Home = () => {
     };
 
     return (
-        <div>
+        <div className="flex flex-col w-full max-w-sm items-center space-y-4 mx-auto pt-4 pl-4 pr-4">
             <h1>Welcome to My Vital Mate</h1>
-            <input
-                type="text"
-                value={searchQuery}
-                onChange={(e) => setSearchQuery(e.target.value)}
-                placeholder="Test backend"
-            />
-            <button onClick={handleBackendCall}>Search</button>
+            <div className="flex w-full items-center space-x-2">
+                <Input
+                    type="text"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Test backend"
+                />
+                <Button variant={"default"} onClick={handleBackendCall}>Search</Button>
+            </div>
             <p>{result}</p>
         </div>
     );
