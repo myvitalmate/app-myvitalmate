@@ -1,39 +1,37 @@
 import {Link} from "react-router-dom";
-import styles from "./NavBar.module.css";
 
-const NavBar = () => {
+export default function NavBar() {
+    const navigation = [
+        {name: "Home", href: "/"},
+        {name: "Chat", href: "/chat"},
+        {name: "Recipes", href: "/recipes"},
+        {name: "Registration", href: "/registration"},
+        {name: "About", href: "/about"},
+    ]
+
     return (
-        <nav className={styles.nav}>
-            <h1 className={styles.title}>My Vital Mate</h1>
-            <ul className={styles.navLinks}>
-                <li>
-                    <Link to="/" className={styles.link}>
-                        Home
-                    </Link>
-                </li>
-                <li>
-                    <Link to="/chat" className={styles.link}>
-                        Chat
-                    </Link>
-                </li>
-                <li>
-                    <Link to="/recipes" className={styles.link}>
-                        Recipes
-                    </Link>
-                </li>
-                <li>
-                    <Link to="/registration" className={styles.link}>
-                        Registration
-                    </Link>
-                </li>
-                <li>
-                    <Link to="/about" className={styles.link}>
-                        About
-                    </Link>
-                </li>
-            </ul>
-        </nav>
-    );
-};
+        <header className="sticky top-0 z-50 w-full border-b bg-zinc-900">
+            <div className=" flex h-16 items-center justify-between px-4 sm:px-8">
+                <Link to="/" className="text-2xl font-semibold text-white">
+                    My Vital Mate
+                </Link>
 
-export default NavBar;
+                <nav className="md:flex md:items-center">
+                    <div className="flex space-x-6">
+                        {navigation.map((item) => (
+                            <Link
+                                key={item.name}
+                                to={item.href}
+                                className="text-sm font-medium text-white transition-colors hover:text-zinc-300"
+                            >
+                                {item.name}
+                            </Link>
+                        ))}
+                    </div>
+                </nav>
+
+            </div>
+        </header>
+    )
+}
+
