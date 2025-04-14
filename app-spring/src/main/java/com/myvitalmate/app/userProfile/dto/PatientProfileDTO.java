@@ -3,7 +3,7 @@ package com.myvitalmate.app.userProfile.dto;
 
 import java.time.LocalDate;
 
-public record PatientRegistrationDTO(
+public record PatientProfileDTO(
         String firstName,
         String lastName,
         ContactDTO contact,

@@ -4,6 +4,8 @@ import Home from "./pages/Home/HomePage.tsx";
 import About from "./pages/About/About.tsx";
 import ChatPage from "./pages/Chat/ChatPage.tsx";
 import RecipesPage from "./pages/Recipes/RecipesPage.tsx";
+import ProfilePage from "@/pages/Profiles/ProfilePage.tsx";
+import LoginPage from "./pages/Login/LoginPage.tsx";
 import RegistrationPage from "./pages/Registration/RegistrationPage.tsx";
 
 // Define routes in an object format
@@ -12,7 +14,9 @@ const routes = [
     {path: '/about', element: <About/>},
     {path: '/recipes', element: <RecipesPage/>},
     {path: '/chat', element: <ChatPage/>},
-    {path: '/registration', element: <RegistrationPage/>}
+    {path: '/profile', element: <ProfilePage/>},
+    {path: '/login', element: <LoginPage/>},
+    {path: '/register', element: <RegistrationPage/>}
 ];
 
 const App = () => {

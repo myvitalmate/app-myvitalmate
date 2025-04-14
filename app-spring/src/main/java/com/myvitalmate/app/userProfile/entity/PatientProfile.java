@@ -1,6 +1,6 @@
 package com.myvitalmate.app.userProfile.entity;
 
-import com.myvitalmate.app.userProfile.dto.PatientRegistrationDTO;
+import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
 import jakarta.persistence.*;
 
 @Entity
@@ -16,7 +16,7 @@ public class PatientProfile extends Profile {
     private String goals;
     private String sickness;
 
-    public PatientProfile(PatientRegistrationDTO dto) {
+    public PatientProfile(PatientProfileDTO dto) {
         super(new Name(dto.firstName(), dto.lastName()),
                 new Adresse(dto.adresse()),
                 new Contact(dto.contact()),
