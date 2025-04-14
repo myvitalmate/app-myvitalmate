@@ -1,6 +1,6 @@
 package com.myvitalmate.app.userProfile.service;
 
-import com.myvitalmate.app.userProfile.dto.PatientRegistrationDTO;
+import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
 import com.myvitalmate.app.userProfile.entity.PatientProfile;
 import com.myvitalmate.app.userProfile.repository.PatientProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,7 +15,7 @@ public class PatientService {
     private ValidationService validationService;
 
 
-    public PatientProfile registerPatient(PatientRegistrationDTO dto) {
+    public PatientProfile registerPatient(PatientProfileDTO dto) {
 
         validationService.validateLastName(dto.lastName(), "Last Name");
         validationService.validateCity(dto.adresse().city());
