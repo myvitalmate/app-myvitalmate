@@ -60,6 +60,14 @@ const Profile = () => {
         }));
     };
 
+    // Handle select changes (for dropdown components)
+    const handleSelectChange = (name: string, value: string) => {
+        setFormData((prevData) => ({
+            ...prevData,
+            [name]: value
+        }));
+    };
+
     // Handle date selection
     const handleDateChange = (e: ChangeEvent<HTMLInputElement>) => {
         setFormData((prevData) => ({
@@ -196,14 +204,20 @@ const Profile = () => {
                         </div>
 
                         <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                            <Input
-                                type="text"
+                            <Select
                                 name="gender"
-                                placeholder="Gender"
                                 value={formData.gender}
-                                onChange={handleChange}
-                                required
-                            />
+                                onValueChange={(value) => handleSelectChange("gender", value)}
+                            >
+                                <SelectTrigger className="w-full">
+                                    <SelectValue placeholder="Select Gender" />
+                                </SelectTrigger>
+                                <SelectContent>
+                                    <SelectItem value="Male">Male</SelectItem>
+                                    <SelectItem value="Female">Female</SelectItem>
+                                    <SelectItem value="Other">Other</SelectItem>
+                                </SelectContent>
+                            </Select>
                             <Input
                                 type="date"
                                 name="birthday"
