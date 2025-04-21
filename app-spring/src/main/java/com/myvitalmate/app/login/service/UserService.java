@@ -3,10 +3,11 @@ package com.myvitalmate.app.login.service;
 import com.myvitalmate.app.login.dto.AuthResponseDTO;
 import com.myvitalmate.app.login.dto.LoginDTO;
 import com.myvitalmate.app.login.dto.RegistrationDTO;
-import com.myvitalmate.app.login.entity.Role;
 import com.myvitalmate.app.login.entity.User;
 import com.myvitalmate.app.login.repository.UserRepository;
 import com.myvitalmate.app.login.security.JwtTokenProvider;
+import com.myvitalmate.app.userProfile.service.ValidationException;
+import com.myvitalmate.app.userProfile.service.ValidationService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.security.authentication.BadCredentialsException;
@@ -18,6 +19,9 @@ import org.springframework.stereotype.Service;
 
 @Service
 public class UserService implements UserDetailsService {
+
+    @Autowired
+    private ValidationService validationService;
 
     @Autowired
     private UserRepository userRepository;
@@ -39,21 +43,25 @@ public class UserService implements UserDetailsService {
         if (userRepository.existsByEmail(registrationDTO.email())) {
             throw new IllegalArgumentException("Email already in use");
         }
+        try {
+            validationService.validateEmail(registrationDTO.email());
+            validationService.validatePassword(registrationDTO.password());
+            validationService.validateRole(registrationDTO.role().name());
 
-        // Create user with encoded password
-        User user = new User(
-                registrationDTO.email(),
-                passwordEncoder.encode(registrationDTO.password()),
-                registrationDTO.role()
-        );
+            User user = new User(
+                    registrationDTO.email(),
+                    passwordEncoder.encode(registrationDTO.password()),
+                    registrationDTO.role()
+            );
 
-        // Save user
-        User savedUser = userRepository.save(user);
+            User savedUser = userRepository.save(user);
+            String token = jwtTokenProvider.createToken(savedUser);
 
-        // Generate JWT token
-        String token = jwtTokenProvider.createToken(savedUser);
+            return new AuthResponseDTO(token, savedUser.getEmail(), savedUser.getRole(), savedUser.getProfileId());
 
-        return new AuthResponseDTO(token, savedUser.getEmail(), savedUser.getRole(), savedUser.getProfileId());
+        } catch (ValidationException | IllegalArgumentException e) {
+            throw e;
+        }
     }
 
     public AuthResponseDTO login(LoginDTO loginDTO) {

@@ -1,5 +1,5 @@
-import React, { useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useState} from 'react';
+import {useNavigate} from 'react-router-dom';
 
 const BASE_URL = 'http://localhost:8080';
 
@@ -21,7 +21,7 @@ const RegistrationPage: React.FC = () => {
     });
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement | HTMLSelectElement>) => {
-        const { name, value } = e.target;
+        const {name, value} = e.target;
         setFormData(prev => ({
             ...prev,
             [name]: value
@@ -31,13 +31,11 @@ const RegistrationPage: React.FC = () => {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        // Validate passwords match
         if (formData.password !== formData.confirmPassword) {
             setMessage('Passwords do not match');
             return;
         }
 
-        // Prepare registration data
         const registrationData = {
             email: formData.email,
             password: formData.password,
@@ -56,40 +54,26 @@ const RegistrationPage: React.FC = () => {
             const data = await response.json();
 
             if (response.ok) {
-                // Store token
                 localStorage.setItem('token', data.token);
                 setMessage('Registration successful!');
-                // Redirect to login page
-                setTimeout(() => navigate('/login'), 2000);
+                setTimeout(() => {
+                    navigate('/');
+                }, 1500);
             } else {
-                setMessage(data.message || 'Registration failed. Please try again.');
+                setMessage(data.message);
             }
         } catch (error) {
-            const errorMsg = error instanceof Error ? error.message : "Unknown error";
-            setMessage(`Something went wrong. Please try again. ${errorMsg}`);
+            setMessage('Network error. Please try again later.');
+            console.error('Registration error:', error);
         }
     };
 
     return (
         <div className="max-w-md mx-auto p-6 bg-white rounded shadow-md">
-            <h2 className="text-2xl font-bold mb-6">Registration</h2>
+            <h2 className="text-2xl font-bold mb-6">Register</h2>
             {message && <p className="mb-4 text-red-500">{message}</p>}
 
             <form onSubmit={handleSubmit}>
-                <div className="mb-4">
-                    <label className="block mb-2">Account Type</label>
-                    <select
-                        name="role"
-                        value={formData.role}
-                        onChange={handleChange}
-                        className="w-full p-2 border rounded"
-                        required
-                    >
-                        <option value="PATIENT">Patient</option>
-                        <option value="DIETITIAN">Dietitian</option>
-                    </select>
-                </div>
-
                 <div className="mb-4">
                     <label className="block mb-2">Email</label>
                     <input
@@ -126,22 +110,35 @@ const RegistrationPage: React.FC = () => {
                     />
                 </div>
 
+                <div className="mb-4">
+                    <label className="block mb-2">Role</label>
+                    <select
+                        name="role"
+                        value={formData.role}
+                        onChange={handleChange}
+                        className="w-full p-2 border rounded"
+                    >
+                        <option value="PATIENT">Patient</option>
+                        <option value="DIETITIAN">Dietitian</option>
+                    </select>
+                </div>
+
                 <button
                     type="submit"
                     className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                 >
                     Register
                 </button>
-            </form>
 
-            <div className="mt-4 text-center">
-                <p>
-                    Already have an account?{' '}
-                    <a href="/login" className="text-blue-500 hover:underline">
-                        Login
-                    </a>
-                </p>
-            </div>
+                <div className="mt-4 text-center">
+                    <p>
+                        Already have an account?{' '}
+                        <a href="/login" className="text-blue-500 hover:underline">
+                            Login
+                        </a>
+                    </p>
+                </div>
+            </form>
         </div>
     );
 };

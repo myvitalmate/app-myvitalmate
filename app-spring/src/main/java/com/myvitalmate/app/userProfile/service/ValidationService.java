@@ -86,8 +86,31 @@ public class ValidationService {
     public void validateCurrentWeight(String currentWeight) {
         validateIsNotEmpty(currentWeight, "Current Weight");
 
-        if (!currentWeight.matches("^\\d{1,3}(\\.\\d{1,2})?$")) {
-            throw new ValidationException("Invalid Current Weight. It should be a number with up to two decimal places.");
+        if (!currentWeight.matches("^\\d{1,3}(\\.\\d{1,3})?$")) {
+            throw new ValidationException("Invalid Current Weight. It should be a number with up to three decimal places.");
+        }
+    }
+
+    public void validateRole(String role) {
+        if (!role.equals("PATIENT") && !role.equals("DIETITIAN")) {
+            throw new ValidationException("Invalid Role. It should be PATIENT or DIETITIAN.");
+        }
+    }
+
+    public void validatePassword(String password) {
+        validateIsNotEmpty(password, "Password");
+
+        if (!password.matches(".*[A-Z].*")) {
+            throw new ValidationException("Password must contain at least one uppercase letter");
+        }
+        if (!password.matches(".*[0-9].*")) {
+            throw new ValidationException("Password must contain at least one number");
+        }
+        if (password.length() < 8) {
+            throw new ValidationException("Password must be at least 8 characters long");
+        }
+        if (!password.matches(".*[a-z].*")) {
+            throw new ValidationException("Password must contain at least one lowercase letter");
         }
     }
 
