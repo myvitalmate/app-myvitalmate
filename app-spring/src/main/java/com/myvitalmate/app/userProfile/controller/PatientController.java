@@ -1,6 +1,6 @@
 package com.myvitalmate.app.userProfile.controller;
 
-import com.myvitalmate.app.userProfile.dto.PatientRegistrationDTO;
+import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
 import com.myvitalmate.app.userProfile.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -17,8 +17,8 @@ public class PatientController {
     private PatientService patientService;
 
     @PostMapping("/create")
-    public ResponseEntity<Void> registerPatient(@RequestBody PatientRegistrationDTO patientRegistrationDto) {
-        patientService.registerPatient(patientRegistrationDto);
+    public ResponseEntity<Void> registerPatient(@RequestBody PatientProfileDTO patientProfileDto) {
+        patientService.registerPatient(patientProfileDto);
         return ResponseEntity.ok().build();
     }
 }

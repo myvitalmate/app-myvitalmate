@@ -1,6 +1,6 @@
 package com.myvitalmate.app.userProfile.controller;
 
-import com.myvitalmate.app.userProfile.dto.DietitianRegistrationDTO;
+import com.myvitalmate.app.userProfile.dto.DietitianProfileDTO;
 import com.myvitalmate.app.userProfile.entity.DietitianProfile;
 import com.myvitalmate.app.userProfile.service.DietitianService;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -18,8 +18,8 @@ public class DietitianController {
     private DietitianService dietitianService;
 
     @PostMapping("/create")
-    public ResponseEntity<Void> registerDietitian(@RequestBody DietitianRegistrationDTO dietitianRegistrationDTO) {
-        DietitianProfile dietitianProfile = dietitianService.registerDietitian(dietitianRegistrationDTO);
+    public ResponseEntity<Void> registerDietitian(@RequestBody DietitianProfileDTO dietitianProfileDTO) {
+        DietitianProfile dietitianProfile = dietitianService.registerDietitian(dietitianProfileDTO);
         return ResponseEntity.ok().build();
     }
 }

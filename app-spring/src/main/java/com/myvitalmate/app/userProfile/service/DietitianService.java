@@ -1,6 +1,6 @@
 package com.myvitalmate.app.userProfile.service;
 
-import com.myvitalmate.app.userProfile.dto.DietitianRegistrationDTO;
+import com.myvitalmate.app.userProfile.dto.DietitianProfileDTO;
 import com.myvitalmate.app.userProfile.entity.DietitianProfile;
 import com.myvitalmate.app.userProfile.repository.DietitianProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +14,7 @@ public class DietitianService {
     @Autowired
     private ValidationService validationService;
 
-    public DietitianProfile registerDietitian(DietitianRegistrationDTO dto) {
+    public DietitianProfile registerDietitian(DietitianProfileDTO dto) {
 
         validationService.validateFirstName(dto.firstName(), "First Name");
         validationService.validateLastName(dto.lastName(), "Last Name");

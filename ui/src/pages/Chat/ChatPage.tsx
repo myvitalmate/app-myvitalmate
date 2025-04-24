@@ -13,19 +13,31 @@ interface ChatPageProps {
 const BASE_URL = 'http://localhost:8080';
 
 export const sendMessage = async (message: string, model: string) => {
-    const response = await fetch(`${BASE_URL}/chat/message/`, {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({
-            message: message,
-            model: model
-        }),
-    });
+    try {
+        const response = await fetch(`${BASE_URL}/chat/message/`, {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({
+                message: message,
+                model: model
+            }),
+        });
 
-    const data = await response.json();
-    return data.message;
+        if (!response.ok) {
+            if (response.status === 401 || response.status === 403) {
+                return "Authentication error: Please log in to use the chat feature.";
+            }
+            return `Error: ${response.status} ${response.statusText}`;
+        }
+
+        const data = await response.json();
+        return data.response || data.message;
+    } catch (error) {
+        console.error('Chat request failed:', error);
+        return "Error connecting to the chat service. Please try again later.";
+    }
 };
 
 interface ChatMessage {

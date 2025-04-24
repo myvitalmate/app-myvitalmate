@@ -1,0 +1,11 @@
+package com.myvitalmate.app.login.dto;
+
+import com.myvitalmate.app.login.entity.Role;
+
+public record AuthResponseDTO(
+        String token,
+        String email,
+        Role role,
+        Long profileId
+) {
+}

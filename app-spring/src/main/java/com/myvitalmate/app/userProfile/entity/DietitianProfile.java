@@ -1,6 +1,6 @@
 package com.myvitalmate.app.userProfile.entity;
 
-import com.myvitalmate.app.userProfile.dto.DietitianRegistrationDTO;
+import com.myvitalmate.app.userProfile.dto.DietitianProfileDTO;
 import jakarta.persistence.*;
 
 @Entity
@@ -13,7 +13,7 @@ public class DietitianProfile extends Profile {
 
     private String specialty;
 
-    public DietitianProfile(DietitianRegistrationDTO dto) {
+    public DietitianProfile(DietitianProfileDTO dto) {
         super(new Name(dto.firstName(), dto.lastName()),
                 new Adresse(dto.adresse()),
                 new Contact(dto.contact()),
