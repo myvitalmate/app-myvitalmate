@@ -14,7 +14,6 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.stereotype.Component;
 
 import java.security.Key;
-import java.util.Base64;
 import java.util.Date;
 
 @Component
@@ -27,7 +26,7 @@ public class JwtTokenProvider {
     private long validityInMilliseconds;
 
     @Autowired
-    private ApplicationContext applicationContext;
+    private ApplicationContext applicationContext; //need for lazy load of userDetailsService only load when needed
 
     private UserDetailsService userDetailsService;
 
@@ -35,14 +34,13 @@ public class JwtTokenProvider {
 
     @PostConstruct
     protected void init() {
-        secretKey = Base64.getEncoder().encodeToString(secretKey.getBytes());
         key = Keys.hmacShaKeyFor(secretKey.getBytes());
     }
 
-    public String createToken(User user) {
-        Claims claims = Jwts.claims().setSubject(user.getEmail());
-        claims.put("role", user.getRole().name());
-        claims.put("profileId", user.getProfileId());
+    public String createToken(User userData) {
+        Claims claims = Jwts.claims().setSubject(userData.getEmail());
+        claims.put("role", userData.getRole().name());
+        claims.put("profileId", userData.getProfileId());
 
         Date now = new Date();
         Date validity = new Date(now.getTime() + validityInMilliseconds);
@@ -55,7 +53,7 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public Authentication getAuthentication(String token) {
+    public Authentication getAuthentication(String token) { //starts userDetailsService when needed
         if (userDetailsService == null) {
             userDetailsService = applicationContext.getBean(UserDetailsService.class);
         }
@@ -70,7 +68,7 @@ public class JwtTokenProvider {
     public boolean validateToken(String token) {
         try {
             Jws<Claims> claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token);
-            return !claims.getBody().getExpiration().before(new Date());
+            return claims.getBody().getExpiration().after(new Date());
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }

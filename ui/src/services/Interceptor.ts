@@ -9,6 +9,5 @@ window.fetch = async (url, options = {}) => {
             'Authorization': `Bearer ${token}`,
         };
     }
-
     return originalFetch(url, options);
 };
