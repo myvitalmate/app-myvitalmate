@@ -16,6 +16,11 @@ public class PatientProfile extends Profile {
     private String goals;
     private String sickness;
 
+    public PatientProfile() {
+        // JPA requires a no-arg constructor
+    }
+
+
     public PatientProfile(PatientProfileDTO dto) {
         super(new Name(dto.firstName(), dto.lastName()),
                 new Adresse(dto.adresse()),
