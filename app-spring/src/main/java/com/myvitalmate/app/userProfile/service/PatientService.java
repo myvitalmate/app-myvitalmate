@@ -6,6 +6,8 @@ import com.myvitalmate.app.userProfile.repository.PatientProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class PatientService {
 
@@ -41,5 +43,13 @@ public class PatientService {
 
         PatientProfile patient = new PatientProfile(dto);
         return repository.save(patient);
+    }
+
+    public List<PatientProfile> viewAllPatients() {
+        List<PatientProfile> patients = repository.findAll();
+        if (patients.isEmpty()) {
+            throw new RuntimeException("No patients found in database");
+        }
+        return patients;
     }
 }

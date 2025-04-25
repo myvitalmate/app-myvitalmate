@@ -6,6 +6,8 @@ import com.myvitalmate.app.userProfile.repository.DietitianProfileRepository;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.util.List;
+
 @Service
 public class DietitianService {
 
@@ -40,4 +42,13 @@ public class DietitianService {
         DietitianProfile dietitianProfile = new DietitianProfile(dto);
         return repository.save(dietitianProfile);
     }
+
+    public List<DietitianProfile> viewAllDietitians() {
+        List<DietitianProfile> dietitians = repository.findAll();
+        if (dietitians.isEmpty()) {
+            throw new RuntimeException("No dietitians found in database");
+        }
+        return dietitians;
+    }
+
 }

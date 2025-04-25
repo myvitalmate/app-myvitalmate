@@ -13,6 +13,10 @@ public class DietitianProfile extends Profile {
 
     private String specialty;
 
+    public DietitianProfile() {
+        // JPA requires a no-arg constructor
+    }
+
     public DietitianProfile(DietitianProfileDTO dto) {
         super(new Name(dto.firstName(), dto.lastName()),
                 new Adresse(dto.adresse()),

@@ -18,6 +18,9 @@ public abstract class Profile {
     private LocalDate birthday;
     private String gender;
 
+    public Profile() {
+    }
+
     public Profile(Name name, Adresse adresse, Contact contact, LocalDate birthday, String gender) {
         this.name = name;
         this.adresse = adresse;
