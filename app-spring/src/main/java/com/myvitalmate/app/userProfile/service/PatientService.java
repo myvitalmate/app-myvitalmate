@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class PatientService {
@@ -45,11 +46,13 @@ public class PatientService {
         return repository.save(patient);
     }
 
-    public List<PatientProfile> viewAllPatients() {
+    public List<PatientProfileDTO> viewAllPatients() {
         List<PatientProfile> patients = repository.findAll();
         if (patients.isEmpty()) {
             throw new RuntimeException("No patients found in database");
         }
-        return patients;
+        return patients.stream()
+                .map(PatientProfileDTO::fromEntity)
+                .collect(Collectors.toList());
     }
 }

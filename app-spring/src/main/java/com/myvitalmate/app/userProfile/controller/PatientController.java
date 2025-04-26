@@ -1,7 +1,6 @@
 package com.myvitalmate.app.userProfile.controller;
 
 import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
-import com.myvitalmate.app.userProfile.entity.PatientProfile;
 import com.myvitalmate.app.userProfile.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,9 +22,9 @@ public class PatientController {
     }
 
     @GetMapping("/viewAll")
-    public ResponseEntity<List<PatientProfile>> viewAllPatients() {
+    public ResponseEntity<List<PatientProfileDTO>> viewAllPatients() {
         try {
-            List<PatientProfile> patients = patientService.viewAllPatients();
+            List<PatientProfileDTO> patients = patientService.viewAllPatients();
             return ResponseEntity.ok(patients);
         } catch (RuntimeException e) {
             return ResponseEntity.noContent().build();

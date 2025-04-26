@@ -22,7 +22,8 @@ public class PatientProfile extends Profile {
 
 
     public PatientProfile(PatientProfileDTO dto) {
-        super(new Name(dto.firstName(), dto.lastName()),
+        super(dto.firstName(),
+                dto.lastName(),
                 new Adresse(dto.adresse()),
                 new Contact(dto.contact()),
                 dto.birthday(),

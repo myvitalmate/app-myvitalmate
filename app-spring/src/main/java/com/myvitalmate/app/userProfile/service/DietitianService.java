@@ -7,6 +7,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.stream.Collectors;
 
 @Service
 public class DietitianService {
@@ -43,12 +44,13 @@ public class DietitianService {
         return repository.save(dietitianProfile);
     }
 
-    public List<DietitianProfile> viewAllDietitians() {
+    public List<DietitianProfileDTO> viewAllDietitians() {
         List<DietitianProfile> dietitians = repository.findAll();
         if (dietitians.isEmpty()) {
             throw new RuntimeException("No dietitians found in database");
         }
-        return dietitians;
+        return dietitians.stream()
+                .map(DietitianProfileDTO::fromEntity)
+                .collect(Collectors.toList());
     }
-
 }

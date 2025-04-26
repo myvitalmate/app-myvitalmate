@@ -23,9 +23,9 @@ public class DietitianController {
     }
 
     @GetMapping("/viewAll")
-    public ResponseEntity<List<DietitianProfile>> viewAllDietitians() {
+    public ResponseEntity<List<DietitianProfileDTO>> viewAllDietitians() {
         try {
-            List<DietitianProfile> dietitians = dietitianService.viewAllDietitians();
+            List<DietitianProfileDTO> dietitians = dietitianService.viewAllDietitians();
             return ResponseEntity.ok(dietitians);
         } catch (RuntimeException e) {
             return ResponseEntity.noContent().build();
