@@ -2,18 +2,22 @@ package com.myvitalmate.app.userProfile.service;
 
 import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
 import com.myvitalmate.app.userProfile.entity.PatientProfile;
+import com.myvitalmate.app.userProfile.mapper.PatientMapper;
 import com.myvitalmate.app.userProfile.repository.PatientProfileRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
-import java.util.stream.Collectors;
 
 @Service
+@Transactional
 public class PatientService {
 
     @Autowired
     private PatientProfileRepository repository;
+    @Autowired
+    private PatientMapper patientMapper;
     @Autowired
     private ValidationService validationService;
 
@@ -51,8 +55,6 @@ public class PatientService {
         if (patients.isEmpty()) {
             throw new RuntimeException("No patients found in database");
         }
-        return patients.stream()
-                .map(PatientProfileDTO::fromEntity)
-                .collect(Collectors.toList());
+        return patientMapper.toDtoList(patients);
     }
 }

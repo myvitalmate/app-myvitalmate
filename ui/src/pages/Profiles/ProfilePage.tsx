@@ -64,7 +64,7 @@ const Profile = () => {
     const [responseMessage, setResponseMessage] = useState<string>("")
     const [messageType, setMessageType] = useState<"success" | "error">("success")
 
-    // Form state
+
     const [formData, setFormData] = useState<FormData>({
         firstName: "",
         lastName: "",
