@@ -90,14 +90,12 @@ const Profile = () => {
         const fetchProfiles = async () => {
             setIsLoading(true)
             try {
-                // Fetch dietitians
                 const dietitiansResponse = await fetch(`${BASE_URL}/dietitians/viewAll`)
                 if (dietitiansResponse.ok) {
                     const dietitiansData = await dietitiansResponse.json()
                     setDietitians(dietitiansData || [])
                 }
 
-                // Fetch patients
                 const patientsResponse = await fetch(`${BASE_URL}/patients/viewAll`)
                 if (patientsResponse.ok) {
                     const patientsData: Profile[] = await patientsResponse.json()
@@ -115,15 +113,17 @@ const Profile = () => {
         fetchProfiles()
     }, [])
 
-    // Handle input changes
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const {name, value} = e.target
+        const { name, value } = e.target
+
+        // Capitalize first letter of every input
+        const capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1)
+
         setFormData((prevData) => ({
             ...prevData,
-            [name]: value,
+            [name]: capitalizedValue,
         }))
 
-        // Clear error when field is edited
         if (errors[name]) {
             setErrors((prev) => {
                 const newErrors = {...prev}
@@ -133,14 +133,12 @@ const Profile = () => {
         }
     }
 
-    // Handle select changes
     const handleSelectChange = (name: string, value: string) => {
         setFormData((prevData) => ({
             ...prevData,
-            [name]: value,
+            [name]: capitalizedValue,
         }))
 
-        // Clear error when field is edited
         if (errors[name]) {
             setErrors((prev) => {
                 const newErrors = {...prev}
@@ -150,11 +148,9 @@ const Profile = () => {
         }
     }
 
-    // Validate form
     const validateForm = (): boolean => {
         const newErrors: Record<string, string> = {}
 
-        // Required fields for all profiles
         const requiredFields = [
             "firstName",
             "lastName",
@@ -241,7 +237,6 @@ const Profile = () => {
                 setResponseMessage(`${userType.charAt(0).toUpperCase() + userType.slice(1)} profile created successfully!`)
                 setMessageType("success")
 
-                // Reset form
                 setFormData({
                     firstName: "",
                     lastName: "",
@@ -260,7 +255,6 @@ const Profile = () => {
                     sickness: "",
                 })
 
-                // Refresh the profiles list
                 const refreshResponse = await fetch(`${BASE_URL}/${userType}s/viewAll`)
                 if (refreshResponse.ok) {
                     const refreshData = await refreshResponse.json()
@@ -270,8 +264,6 @@ const Profile = () => {
                         setPatients(refreshData || [])
                     }
                 }
-
-                setActiveView("view")
             } else {
                 const contentType = response.headers.get("content-type")
                 let errorMessage = "Something went wrong"
