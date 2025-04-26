@@ -9,32 +9,41 @@ import java.time.LocalDate;
 public abstract class Profile {
 
     @Embedded
-    private Name name;
-    @Embedded
     private Adresse adresse;
     @Embedded
     private Contact contact;
 
+    private String firstName;
+    private String lastName;
     private LocalDate birthday;
     private String gender;
 
     public Profile() {
     }
 
-    public Profile(Name name, Adresse adresse, Contact contact, LocalDate birthday, String gender) {
-        this.name = name;
+    public Profile(String firstName, String lastName, Adresse adresse, Contact contact, LocalDate birthday, String gender) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.adresse = adresse;
         this.contact = contact;
         this.birthday = birthday;
         this.gender = gender;
     }
 
-    public Name getName() {
-        return name;
+    public String getFirstName() {
+        return firstName;
     }
 
-    public void setName(Name name) {
-        this.name = name;
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public Adresse getAdresse() {

@@ -16,10 +16,8 @@ type UserType = "dietitian" | "patient"
 
 interface Profile {
     id: number
-    name: {
-        firstName: string
-        lastName: string
-    }
+    firstName: string
+    lastName: string
     contact: {
         email: string
         phoneNumber: string
@@ -102,8 +100,8 @@ const Profile = () => {
                 // Fetch patients
                 const patientsResponse = await fetch(`${BASE_URL}/patients/viewAll`)
                 if (patientsResponse.ok) {
-                    const patientsData = await patientsResponse.json()
-                    setPatients(patientsData || [])
+                    const patientsData: Profile[] = await patientsResponse.json()
+                    setPatients(patientsData)
                 }
             } catch (error) {
                 console.error("Error fetching profiles:", error)
@@ -346,7 +344,7 @@ const Profile = () => {
                                                     <div className="flex items-start gap-3">
                                                         <div className="space-y-1">
                                                             <h4 className="font-medium leading-none">
-                                                                {dietitian.name.firstName} {dietitian.name.lastName}
+                                                                {dietitian.firstName} {dietitian.lastName}
                                                             </h4>
                                                             <div
                                                                 className="text-sm text-muted-foreground">{dietitian.contact.email}</div>
@@ -401,7 +399,7 @@ const Profile = () => {
                                                     <div className="flex items-start gap-3">
                                                         <div className="space-y-1">
                                                             <h4 className="font-medium leading-none">
-                                                                {patient.name.firstName} {patient.name.lastName}
+                                                                {patient.firstName} {patient.lastName}
                                                             </h4>
                                                             <div
                                                                 className="text-sm text-muted-foreground">{patient.contact.email}</div>

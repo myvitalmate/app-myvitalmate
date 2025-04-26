@@ -18,7 +18,8 @@ public class DietitianProfile extends Profile {
     }
 
     public DietitianProfile(DietitianProfileDTO dto) {
-        super(new Name(dto.firstName(), dto.lastName()),
+        super(dto.firstName(),
+                dto.lastName(),
                 new Adresse(dto.adresse()),
                 new Contact(dto.contact()),
                 dto.birthday(),
