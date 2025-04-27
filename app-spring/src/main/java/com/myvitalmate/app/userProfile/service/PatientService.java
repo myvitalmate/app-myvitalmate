@@ -24,7 +24,8 @@ public class PatientService {
 
     public PatientProfile createPatientProfile(PatientProfileDTO dto) {
 
-        validationService.validateLastName(dto.lastName(), "Last Name");
+        validationService.validateFirstName(dto.firstName());
+        validationService.validateLastName(dto.lastName());
         validationService.validateCity(dto.adresse().city());
         validationService.validateStreet(dto.adresse().street());
         validationService.validateCountry(dto.adresse().country());
