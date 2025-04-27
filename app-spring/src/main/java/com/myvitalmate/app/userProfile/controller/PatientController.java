@@ -16,8 +16,8 @@ public class PatientController {
     private PatientService patientService;
 
     @PostMapping("/create")
-    public ResponseEntity<Void> registerPatient(@RequestBody PatientProfileDTO patientProfileDto) {
-        patientService.registerPatient(patientProfileDto);
+    public ResponseEntity<Void> createPatientProfile(@RequestBody PatientProfileDTO patientProfileDto) {
+        patientService.createPatientProfile(patientProfileDto);
         return ResponseEntity.ok().build();
     }
 

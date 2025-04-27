@@ -18,7 +18,7 @@ public class DietitianService {
     @Autowired
     private ValidationService validationService;
 
-    public DietitianProfile registerDietitian(DietitianProfileDTO dto) {
+    public DietitianProfile createDietitianProfile(DietitianProfileDTO dto) {
 
         validationService.validateFirstName(dto.firstName(), "First Name");
         validationService.validateLastName(dto.lastName(), "Last Name");
@@ -41,7 +41,7 @@ public class DietitianService {
         }
 
 
-        DietitianProfile dietitianProfile = new DietitianProfile(dto);
+        DietitianProfile dietitianProfile = dietitianMapper.toEntity(dto);
         return repository.save(dietitianProfile);
     }
 
