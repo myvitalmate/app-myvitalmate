@@ -16,8 +16,8 @@ public class DietitianController {
     private DietitianService dietitianService;
 
     @PostMapping("/create")
-    public ResponseEntity<Void> registerDietitian(@RequestBody DietitianProfileDTO dietitianProfileDTO) {
-        dietitianService.registerDietitian(dietitianProfileDTO);
+    public ResponseEntity<Void> createDietitianProfile(@RequestBody DietitianProfileDTO dietitianProfileDTO) {
+        dietitianService.createDietitianProfile(dietitianProfileDTO);
         return ResponseEntity.ok().build();
     }
 

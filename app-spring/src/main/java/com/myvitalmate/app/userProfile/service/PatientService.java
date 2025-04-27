@@ -22,7 +22,7 @@ public class PatientService {
     private ValidationService validationService;
 
 
-    public PatientProfile registerPatient(PatientProfileDTO dto) {
+    public PatientProfile createPatientProfile(PatientProfileDTO dto) {
 
         validationService.validateLastName(dto.lastName(), "Last Name");
         validationService.validateCity(dto.adresse().city());
@@ -46,7 +46,7 @@ public class PatientService {
             throw new ValidationException("A profile with the same email, phone number, or address already exists.");
         }
 
-        PatientProfile patient = new PatientProfile(dto);
+        PatientProfile patient = patientMapper.toEntity(dto);
         return repository.save(patient);
     }
 

@@ -134,6 +134,8 @@ const Profile = () => {
     }
 
     const handleSelectChange = (name: string, value: string) => {
+        const capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1)
+
         setFormData((prevData) => ({
             ...prevData,
             [name]: capitalizedValue,
