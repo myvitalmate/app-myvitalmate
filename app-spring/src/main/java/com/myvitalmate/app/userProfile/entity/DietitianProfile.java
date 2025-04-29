@@ -1,15 +1,12 @@
 package com.myvitalmate.app.userProfile.entity;
 
 import com.myvitalmate.app.userProfile.dto.DietitianProfileDTO;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Dietitian")
 public class DietitianProfile extends Profile {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     private String specialty;
 
@@ -27,13 +24,6 @@ public class DietitianProfile extends Profile {
         this.specialty = dto.specialty();
     }
 
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
-    }
 
     public String getSpecialty() {
         return specialty;

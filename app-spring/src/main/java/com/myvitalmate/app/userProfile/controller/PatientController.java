@@ -22,12 +22,8 @@ public class PatientController {
     }
 
     @GetMapping("/viewAll")
-    public ResponseEntity<List<PatientProfileDTO>> viewAllPatients() {
-        try {
-            List<PatientProfileDTO> patients = patientService.viewAllPatients();
-            return ResponseEntity.ok(patients);
-        } catch (RuntimeException e) {
-            return ResponseEntity.noContent().build();
-        }
+    public ResponseEntity<List<PatientProfileDTO>> viewMyPatients() {
+        List<PatientProfileDTO> patients = patientService.viewMyPatients();
+        return ResponseEntity.ok(patients);
     }
 }

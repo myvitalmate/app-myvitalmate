@@ -1,12 +1,17 @@
 package com.myvitalmate.app.userProfile.entity;
 
-import jakarta.persistence.Embedded;
-import jakarta.persistence.MappedSuperclass;
+import com.myvitalmate.app.login.entity.User;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
-@MappedSuperclass
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Profile {
+
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
 
     @Embedded
     private Adresse adresse;
@@ -18,6 +23,10 @@ public abstract class Profile {
     private LocalDate birthday;
     private String gender;
 
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
     public Profile() {
     }
 
@@ -28,6 +37,14 @@ public abstract class Profile {
         this.contact = contact;
         this.birthday = birthday;
         this.gender = gender;
+    }
+
+    public User getUser() {
+        return user;
+    }
+
+    public void setUser(User user) {
+        this.user = user;
     }
 
     public String getFirstName() {

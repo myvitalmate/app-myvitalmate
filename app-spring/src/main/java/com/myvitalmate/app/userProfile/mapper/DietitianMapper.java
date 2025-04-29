@@ -11,7 +11,7 @@ import java.util.List;
 public interface DietitianMapper {
     DietitianProfileDTO toDto(DietitianProfile entity);
 
-    @Mapping(target = "id", ignore = true)
+    @Mapping(target = "user", ignore = true)
     DietitianProfile toEntity(DietitianProfileDTO dto);
 
     List<DietitianProfileDTO> toDtoList(List<DietitianProfile> entities);
