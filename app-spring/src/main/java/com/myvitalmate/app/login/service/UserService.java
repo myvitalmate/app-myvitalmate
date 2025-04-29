@@ -44,6 +44,7 @@ public class UserService implements UserDetailsService {
         validationService.validateEmail(registrationDTO.email());
         validationService.validatePassword(registrationDTO.password());
         validationService.validateRole(registrationDTO.role().name());
+
         User user = new User(
                 registrationDTO.email(),
                 passwordEncoder.encode(registrationDTO.password()),
@@ -52,7 +53,7 @@ public class UserService implements UserDetailsService {
         User savedUser = userRepository.save(user);
         String token = jwtTokenProvider.createToken(savedUser);
 
-        return new AuthResponseDTO(token, savedUser.getEmail(), savedUser.getRole(), savedUser.getProfileId());
+        return new AuthResponseDTO(token, savedUser.getEmail(), savedUser.getRole());
     }
 
     public AuthResponseDTO login(LoginDTO loginDTO) {
@@ -64,6 +65,6 @@ public class UserService implements UserDetailsService {
         }
 
         String token = jwtTokenProvider.createToken(user);
-        return new AuthResponseDTO(token, user.getEmail(), user.getRole(), user.getProfileId());
+        return new AuthResponseDTO(token, user.getEmail(), user.getRole());
     }
 }

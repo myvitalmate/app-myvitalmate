@@ -1,15 +1,12 @@
 package com.myvitalmate.app.userProfile.entity;
 
 import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
-import jakarta.persistence.*;
+import jakarta.persistence.Entity;
+import jakarta.persistence.Table;
 
 @Entity
 @Table(name = "Patient")
 public class PatientProfile extends Profile {
-
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private Long id;
 
     private String dietOrientation;
     private String currentWeight;
@@ -19,7 +16,6 @@ public class PatientProfile extends Profile {
     public PatientProfile() {
         // JPA requires a no-arg constructor
     }
-
 
     public PatientProfile(PatientProfileDTO dto) {
         super(dto.firstName(),
@@ -32,14 +28,6 @@ public class PatientProfile extends Profile {
         this.currentWeight = dto.currentWeight();
         this.goals = dto.goals();
         this.sickness = dto.sickness();
-    }
-
-    public Long getId() {
-        return id;
-    }
-
-    public void setId(Long id) {
-        this.id = id;
     }
 
     public String getDietOrientation() {
