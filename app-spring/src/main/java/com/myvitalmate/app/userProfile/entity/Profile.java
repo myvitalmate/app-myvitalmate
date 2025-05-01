@@ -1,37 +1,66 @@
 package com.myvitalmate.app.userProfile.entity;
 
-import jakarta.persistence.Embedded;
-import jakarta.persistence.MappedSuperclass;
+import com.myvitalmate.app.login.entity.User;
+import jakarta.persistence.*;
 
 import java.time.LocalDate;
 
-@MappedSuperclass
+@Entity
+@Inheritance(strategy = InheritanceType.JOINED)
 public abstract class Profile {
 
-    @Embedded
-    private Name name;
+    @Id
+    @GeneratedValue(strategy = GenerationType.IDENTITY)
+    private Long id;
+
     @Embedded
     private Adresse adresse;
     @Embedded
     private Contact contact;
 
+    private String firstName;
+    private String lastName;
     private LocalDate birthday;
     private String gender;
 
-    public Profile(Name name, Adresse adresse, Contact contact, LocalDate birthday, String gender) {
-        this.name = name;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "user_id", nullable = false)
+    private User user;
+
+    public Profile() {
+    }
+
+    public Profile(String firstName, String lastName, Adresse adresse, Contact contact, LocalDate birthday, String gender) {
+        this.firstName = firstName;
+        this.lastName = lastName;
         this.adresse = adresse;
         this.contact = contact;
         this.birthday = birthday;
         this.gender = gender;
     }
 
-    public Name getName() {
-        return name;
+    public User getUser() {
+        return user;
     }
 
-    public void setName(Name name) {
-        this.name = name;
+    public void setUser(User user) {
+        this.user = user;
+    }
+
+    public String getFirstName() {
+        return firstName;
+    }
+
+    public void setFirstName(String firstName) {
+        this.firstName = firstName;
+    }
+
+    public String getLastName() {
+        return lastName;
+    }
+
+    public void setLastName(String lastName) {
+        this.lastName = lastName;
     }
 
     public Adresse getAdresse() {

@@ -1,5 +1,6 @@
 package com.myvitalmate.app.login.entity;
 
+import com.myvitalmate.app.userProfile.entity.Profile;
 import jakarta.persistence.*;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
@@ -7,6 +8,7 @@ import org.springframework.security.core.userdetails.UserDetails;
 
 import java.util.Collection;
 import java.util.Collections;
+import java.util.List;
 
 @Entity
 @Table(name = "users")
@@ -26,7 +28,8 @@ public class User implements UserDetails {
     @Column(nullable = false)
     private Role role;
 
-    private Long profileId;
+    @OneToMany(mappedBy = "user", cascade = CascadeType.ALL)
+    private List<Profile> profiles;
 
     public User() {
     }
@@ -35,6 +38,14 @@ public class User implements UserDetails {
         this.email = email;
         this.password = password;
         this.role = role;
+    }
+
+    public List<Profile> getProfiles() {
+        return profiles;
+    }
+
+    public void setProfiles(List<Profile> profiles) {
+        this.profiles = profiles;
     }
 
     public Long getId() {
@@ -61,14 +72,6 @@ public class User implements UserDetails {
         this.role = role;
     }
 
-    public Long getProfileId() {
-        return profileId;
-    }
-
-    public void setProfileId(Long profileId) {
-        this.profileId = profileId;
-    }
-
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return Collections.singletonList(new SimpleGrantedAuthority("ROLE_" + role.name()));
@@ -77,6 +80,10 @@ public class User implements UserDetails {
     @Override
     public String getPassword() {
         return password;
+    }
+
+    public void setPassword(String password) {
+        this.password = password;
     }
 
     @Override
@@ -102,9 +109,5 @@ public class User implements UserDetails {
     @Override
     public boolean isEnabled() {
         return true;
-    }
-
-    public void setPassword(String password) {
-        this.password = password;
     }
 }

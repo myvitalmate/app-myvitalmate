@@ -1,14 +1,12 @@
 package com.myvitalmate.app.userProfile.controller;
 
 import com.myvitalmate.app.userProfile.dto.DietitianProfileDTO;
-import com.myvitalmate.app.userProfile.entity.DietitianProfile;
 import com.myvitalmate.app.userProfile.service.DietitianService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
-import org.springframework.web.bind.annotation.PostMapping;
-import org.springframework.web.bind.annotation.RequestBody;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
 
 @RestController
 @RequestMapping("/dietitians")
@@ -18,8 +16,14 @@ public class DietitianController {
     private DietitianService dietitianService;
 
     @PostMapping("/create")
-    public ResponseEntity<Void> registerDietitian(@RequestBody DietitianProfileDTO dietitianProfileDTO) {
-        DietitianProfile dietitianProfile = dietitianService.registerDietitian(dietitianProfileDTO);
+    public ResponseEntity<Void> createDietitianProfile(@RequestBody DietitianProfileDTO dietitianProfileDTO) {
+        dietitianService.createDietitianProfile(dietitianProfileDTO);
         return ResponseEntity.ok().build();
+    }
+
+    @GetMapping("/viewAll")
+    public ResponseEntity<List<DietitianProfileDTO>> viewMyDietitians() {
+        List<DietitianProfileDTO> dietitians = dietitianService.viewMyDietitians();
+        return ResponseEntity.ok(dietitians);
     }
 }
