@@ -1,5 +1,6 @@
 package com.myvitalmate.app.userProfile.service;
 
+import com.myvitalmate.app.login.entity.Role;
 import com.myvitalmate.app.login.entity.User;
 import com.myvitalmate.app.login.repository.UserRepository;
 import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
@@ -32,6 +33,15 @@ public class PatientService {
     private UserRepository userRepository;
 
     public void createPatientProfile(PatientProfileDTO dto) {
+        User currentUser = getCurrentUser();
+
+        if (currentUser.getRole() == Role.PATIENT) {
+            List<PatientProfile> existingProfiles = repository.findByUser(currentUser);
+            if (!existingProfiles.isEmpty()) {
+                throw new ValidationException("As a patient, you can only create one profile.");
+            }
+        }
+
         validationService.validateFirstName(dto.firstName());
         validationService.validateLastName(dto.lastName());
         validationService.validateCity(dto.adresse().city());
@@ -79,5 +89,6 @@ public class PatientService {
         List<PatientProfile> patients = repository.findByUser(currentUser);
         return patientMapper.toDtoList(patients);
     }
+
 
 }
