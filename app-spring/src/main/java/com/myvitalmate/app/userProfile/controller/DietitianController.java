@@ -29,13 +29,13 @@ public class DietitianController {
     }
 
     @DeleteMapping("/delete")
-    public ResponseEntity<Void> deleteDietitanProfile(@RequestParam Long id) {
-        dietitianService.deleteDietitanProfile(id);
+    public ResponseEntity<Void> deleteDietitianProfile(@RequestParam Long id) {
+        dietitianService.deleteDietitianProfile(id);
         return ResponseEntity.ok().build();
     }
 
     @PatchMapping("/update/{id}")
-    public ResponseEntity<?> updateDietitanProfile(
+    public ResponseEntity<?> updateDietitianProfile(
             @PathVariable Long id,
             @RequestBody DietitianProfileUpdateDTO dto
     ) {
