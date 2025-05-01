@@ -94,12 +94,25 @@ public class PatientService {
     }
 
     public void deletePatientProfile(Long id) {
+        PatientProfile patient = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patient profile not found"));
+
+        User currentUser = getCurrentUser();
+        if (!patient.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You don't have permission to delete this profile");
+        }
+
         repository.deleteById(id);
     }
 
     public void updatePatientProfile(Long id, PatientProfileUpdateDTO dto) {
         PatientProfile patient = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        User currentUser = getCurrentUser();
+        if (!patient.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You don't have permission to update this profile");
+        }
 
         dto.lastName().ifPresent(patient::setLastName);
         dto.adresse().ifPresent(a -> patient.setAdresse(new Adresse(a)));

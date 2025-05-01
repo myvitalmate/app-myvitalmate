@@ -87,13 +87,26 @@ public class DietitianService {
         return dietitianMapper.toDtoList(dietitians);
     }
 
-    public void deleteDietitanProfile(Long id) {
+    public void deleteDietitianProfile(Long id) {
+        DietitianProfile dietitian = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dietitian profile not found"));
+
+        User currentUser = getCurrentUser();
+        if (!dietitian.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You don't have permission to delete this profile");
+        }
+
         repository.deleteById(id);
     }
 
     public void updateDietitianProfile(Long id, DietitianProfileUpdateDTO dto) {
         DietitianProfile dietitian = repository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Dietitian not found"));
+
+        User currentUser = getCurrentUser();
+        if (!dietitian.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You don't have permission to update this profile");
+        }
 
         dto.lastName().ifPresent(dietitian::setLastName);
         dto.adresse().ifPresent(a -> dietitian.setAdresse(new Adresse(a)));
