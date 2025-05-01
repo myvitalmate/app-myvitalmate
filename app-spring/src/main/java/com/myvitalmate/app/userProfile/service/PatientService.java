@@ -31,7 +31,7 @@ public class PatientService {
     @Autowired
     private UserRepository userRepository;
 
-    public PatientProfile createPatientProfile(PatientProfileDTO dto) {
+    public void createPatientProfile(PatientProfileDTO dto) {
         validationService.validateFirstName(dto.firstName());
         validationService.validateLastName(dto.lastName());
         validationService.validateCity(dto.adresse().city());
@@ -56,7 +56,7 @@ public class PatientService {
 
         PatientProfile patient = patientMapper.toEntity(dto);
         patient.setUser(getCurrentUser());
-        return repository.save(patient);
+        repository.save(patient);
     }
 
     public List<PatientProfileDTO> viewAllPatients() {
@@ -77,9 +77,6 @@ public class PatientService {
     public List<PatientProfileDTO> viewMyPatients() {
         User currentUser = getCurrentUser();
         List<PatientProfile> patients = repository.findByUser(currentUser);
-        if (patients.isEmpty()) {
-            throw new RuntimeException("No patients found for current user");
-        }
         return patientMapper.toDtoList(patients);
     }
 

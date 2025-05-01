@@ -27,7 +27,7 @@ public class DietitianService {
     @Autowired
     private UserRepository userRepository;
 
-    public DietitianProfile createDietitianProfile(DietitianProfileDTO dto) {
+    public void createDietitianProfile(DietitianProfileDTO dto) {
 
         validationService.validateFirstName(dto.firstName());
         validationService.validateLastName(dto.lastName());
@@ -52,7 +52,7 @@ public class DietitianService {
 
         DietitianProfile dietitian = dietitianMapper.toEntity(dto);
         dietitian.setUser(getCurrentUser());
-        return repository.save(dietitian);
+        repository.save(dietitian);
     }
 
     public List<DietitianProfileDTO> viewAllDietitians() {
@@ -74,9 +74,6 @@ public class DietitianService {
     public List<DietitianProfileDTO> viewMyDietitians() {
         User currentUser = getCurrentUser();
         List<DietitianProfile> dietitians = repository.findByUser(currentUser);
-        if (dietitians.isEmpty()) {
-            throw new RuntimeException("No dietitians found for current user");
-        }
         return dietitianMapper.toDtoList(dietitians);
     }
 }
