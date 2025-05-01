@@ -1,23 +1,36 @@
 package com.myvitalmate.app.userProfile.service;
 
+import com.myvitalmate.app.login.entity.User;
+import com.myvitalmate.app.login.repository.UserRepository;
 import com.myvitalmate.app.userProfile.dto.DietitianProfileDTO;
 import com.myvitalmate.app.userProfile.entity.DietitianProfile;
+import com.myvitalmate.app.userProfile.mapper.DietitianMapper;
 import com.myvitalmate.app.userProfile.repository.DietitianProfileRepository;
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
+import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
-@Service
-public class DietitianService {
+import java.util.List;
 
+@Service
+@Transactional
+public class DietitianService {
+    @Autowired
+    private DietitianMapper dietitianMapper;
     @Autowired
     private DietitianProfileRepository repository;
     @Autowired
     private ValidationService validationService;
+    @Autowired
+    private UserRepository userRepository;
 
-    public DietitianProfile registerDietitian(DietitianProfileDTO dto) {
+    public void createDietitianProfile(DietitianProfileDTO dto) {
 
-        validationService.validateFirstName(dto.firstName(), "First Name");
-        validationService.validateLastName(dto.lastName(), "Last Name");
+        validationService.validateFirstName(dto.firstName());
+        validationService.validateLastName(dto.lastName());
         validationService.validateCity(dto.adresse().city());
         validationService.validateStreet(dto.adresse().street());
         validationService.validateCountry(dto.adresse().country());
@@ -37,7 +50,30 @@ public class DietitianService {
         }
 
 
-        DietitianProfile dietitianProfile = new DietitianProfile(dto);
-        return repository.save(dietitianProfile);
+        DietitianProfile dietitian = dietitianMapper.toEntity(dto);
+        dietitian.setUser(getCurrentUser());
+        repository.save(dietitian);
+    }
+
+    public List<DietitianProfileDTO> viewAllDietitians() {
+        List<DietitianProfile> dietitians = repository.findAll();
+        if (dietitians.isEmpty()) {
+            throw new RuntimeException("No dietitians found in database");
+        }
+        return dietitianMapper.toDtoList(dietitians);
+    }
+
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    }
+
+
+    public List<DietitianProfileDTO> viewMyDietitians() {
+        User currentUser = getCurrentUser();
+        List<DietitianProfile> dietitians = repository.findByUser(currentUser);
+        return dietitianMapper.toDtoList(dietitians);
     }
 }

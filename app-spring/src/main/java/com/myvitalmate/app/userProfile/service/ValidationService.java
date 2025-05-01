@@ -13,7 +13,7 @@ public class ValidationService {
         }
     }
 
-    public void validateFirstName(String firstName, String first_name) {
+    public void validateFirstName(String firstName) {
         validateIsNotEmpty(firstName, "First Name");
 
         if (!firstName.matches("^[A-Z][a-zA-Z\\-']*$")) {
@@ -21,7 +21,7 @@ public class ValidationService {
         }
     }
 
-    public void validateLastName(String lastName, String last_name) {
+    public void validateLastName(String lastName) {
         validateIsNotEmpty(lastName, "Last Name");
 
         if (!lastName.matches("^[A-Z][a-zA-Z\\-']*$")) {
