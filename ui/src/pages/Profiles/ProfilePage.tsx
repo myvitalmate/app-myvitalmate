@@ -114,9 +114,8 @@ const Profile = () => {
     }, [])
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const { name, value } = e.target
+        const {name, value} = e.target
 
-        // Capitalize first letter of every input
         const capitalizedValue = value.charAt(0).toUpperCase() + value.slice(1)
 
         setFormData((prevData) => ({
