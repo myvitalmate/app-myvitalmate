@@ -4,6 +4,9 @@ import com.myvitalmate.app.login.entity.Role;
 import com.myvitalmate.app.login.entity.User;
 import com.myvitalmate.app.login.repository.UserRepository;
 import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
+import com.myvitalmate.app.userProfile.dto.PatientProfileUpdateDTO;
+import com.myvitalmate.app.userProfile.entity.Adresse;
+import com.myvitalmate.app.userProfile.entity.Contact;
 import com.myvitalmate.app.userProfile.entity.PatientProfile;
 import com.myvitalmate.app.userProfile.mapper.PatientMapper;
 import com.myvitalmate.app.userProfile.repository.PatientProfileRepository;
@@ -88,6 +91,25 @@ public class PatientService {
         User currentUser = getCurrentUser();
         List<PatientProfile> patients = repository.findByUser(currentUser);
         return patientMapper.toDtoList(patients);
+    }
+
+    public void deletePatientProfile(Long id) {
+        repository.deleteById(id);
+    }
+
+    public void updatePatientProfile(Long id, PatientProfileUpdateDTO dto) {
+        PatientProfile patient = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        dto.lastName().ifPresent(patient::setLastName);
+        dto.adresse().ifPresent(a -> patient.setAdresse(new Adresse(a)));
+        dto.contact().ifPresent(c -> patient.setContact(new Contact(c)));
+        dto.dietOrientation().ifPresent(patient::setDietOrientation);
+        dto.currentWeight().ifPresent(patient::setCurrentWeight);
+        dto.sickness().ifPresent(patient::setSickness);
+        dto.goals().ifPresent(patient::setGoals);
+
+        repository.save(patient);
     }
 
 

@@ -1,6 +1,7 @@
 package com.myvitalmate.app.userProfile.controller;
 
 import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
+import com.myvitalmate.app.userProfile.dto.PatientProfileUpdateDTO;
 import com.myvitalmate.app.userProfile.service.PatientService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -25,5 +26,20 @@ public class PatientController {
     public ResponseEntity<List<PatientProfileDTO>> viewMyPatients() {
         List<PatientProfileDTO> patients = patientService.viewMyPatients();
         return ResponseEntity.ok(patients);
+    }
+
+    @DeleteMapping("/delete")
+    public ResponseEntity<Void> deletePatientProfile(@RequestParam Long id) {
+        patientService.deletePatientProfile(id);
+        return ResponseEntity.ok().build();
+    }
+
+    @PatchMapping("/update/{id}")
+    public ResponseEntity<?> updatePatientProfile(
+            @PathVariable Long id,
+            @RequestBody PatientProfileUpdateDTO dto
+    ) {
+        patientService.updatePatientProfile(id, dto);
+        return ResponseEntity.ok().build();
     }
 }

@@ -4,6 +4,9 @@ import com.myvitalmate.app.login.entity.Role;
 import com.myvitalmate.app.login.entity.User;
 import com.myvitalmate.app.login.repository.UserRepository;
 import com.myvitalmate.app.userProfile.dto.DietitianProfileDTO;
+import com.myvitalmate.app.userProfile.dto.DietitianProfileUpdateDTO;
+import com.myvitalmate.app.userProfile.entity.Adresse;
+import com.myvitalmate.app.userProfile.entity.Contact;
 import com.myvitalmate.app.userProfile.entity.DietitianProfile;
 import com.myvitalmate.app.userProfile.mapper.DietitianMapper;
 import com.myvitalmate.app.userProfile.repository.DietitianProfileRepository;
@@ -82,5 +85,21 @@ public class DietitianService {
         User currentUser = getCurrentUser();
         List<DietitianProfile> dietitians = repository.findByUser(currentUser);
         return dietitianMapper.toDtoList(dietitians);
+    }
+
+    public void deleteDietitanProfile(Long id) {
+        repository.deleteById(id);
+    }
+
+    public void updateDietitianProfile(Long id, DietitianProfileUpdateDTO dto) {
+        DietitianProfile dietitian = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Dietitian not found"));
+
+        dto.lastName().ifPresent(dietitian::setLastName);
+        dto.adresse().ifPresent(a -> dietitian.setAdresse(new Adresse(a)));
+        dto.contact().ifPresent(c -> dietitian.setContact(new Contact(c)));
+        dto.specialty().ifPresent(dietitian::setSpecialty);
+
+        repository.save(dietitian);
     }
 }
