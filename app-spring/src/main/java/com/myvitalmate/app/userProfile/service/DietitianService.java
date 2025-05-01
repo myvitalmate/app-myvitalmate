@@ -1,5 +1,6 @@
 package com.myvitalmate.app.userProfile.service;
 
+import com.myvitalmate.app.login.entity.Role;
 import com.myvitalmate.app.login.entity.User;
 import com.myvitalmate.app.login.repository.UserRepository;
 import com.myvitalmate.app.userProfile.dto.DietitianProfileDTO;
@@ -28,6 +29,14 @@ public class DietitianService {
     private UserRepository userRepository;
 
     public void createDietitianProfile(DietitianProfileDTO dto) {
+        User currentUser = getCurrentUser();
+
+        if (currentUser.getRole() == Role.DIETITIAN) {
+            List<DietitianProfile> existingProfiles = repository.findByUser(currentUser);
+            if (!existingProfiles.isEmpty()) {
+                throw new ValidationException("As a dietitian, you can only create one profile.");
+            }
+        }
 
         validationService.validateFirstName(dto.firstName());
         validationService.validateLastName(dto.lastName());
@@ -49,7 +58,6 @@ public class DietitianService {
             throw new ValidationException("A profile with the same email, phone number, or address already exists.");
         }
 
-
         DietitianProfile dietitian = dietitianMapper.toEntity(dto);
         dietitian.setUser(getCurrentUser());
         repository.save(dietitian);
@@ -69,7 +77,6 @@ public class DietitianService {
         return userRepository.findByEmail(email)
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
-
 
     public List<DietitianProfileDTO> viewMyDietitians() {
         User currentUser = getCurrentUser();
