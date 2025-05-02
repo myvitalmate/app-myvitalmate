@@ -34,7 +34,7 @@ public class DietitianController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/update/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> updateDietitianProfile(
             @PathVariable Long id,
             @RequestBody DietitianProfileUpdateDTO dto

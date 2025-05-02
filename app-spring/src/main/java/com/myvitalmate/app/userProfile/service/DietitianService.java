@@ -108,10 +108,26 @@ public class DietitianService {
             throw new RuntimeException("You don't have permission to update this profile");
         }
 
-        dto.lastName().ifPresent(dietitian::setLastName);
-        dto.adresse().ifPresent(a -> dietitian.setAdresse(new Adresse(a)));
-        dto.contact().ifPresent(c -> dietitian.setContact(new Contact(c)));
-        dto.specialty().ifPresent(dietitian::setSpecialty);
+        validationService.validateFirstName(dto.firstName());
+        validationService.validateLastName(dto.lastName());
+        validationService.validateCity(dto.adresse().city());
+        validationService.validateStreet(dto.adresse().street());
+        validationService.validateCountry(dto.adresse().country());
+        validationService.validatePostalcode(dto.adresse().postalCode());
+        validationService.validateEmail(dto.contact().email());
+        validationService.validatePhoneNumber(dto.contact().phoneNumber());
+        validationService.validateGender(dto.gender());
+        validationService.validateBirthday(dto.birthday());
+        validationService.validateSpecialty(dto.specialty());
+
+        // Update all fields
+        dietitian.setFirstName(dto.firstName());
+        dietitian.setLastName(dto.lastName());
+        dietitian.setAdresse(new Adresse(dto.adresse()));
+        dietitian.setContact(new Contact(dto.contact()));
+        dietitian.setGender(dto.gender());
+        dietitian.setBirthday(dto.birthday());
+        dietitian.setSpecialty(dto.specialty());
 
         repository.save(dietitian);
     }

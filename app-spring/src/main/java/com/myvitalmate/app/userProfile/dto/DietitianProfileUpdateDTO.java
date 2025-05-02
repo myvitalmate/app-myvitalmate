@@ -1,11 +1,14 @@
 package com.myvitalmate.app.userProfile.dto;
 
-import java.util.Optional;
+import java.time.LocalDate;
 
 public record DietitianProfileUpdateDTO(
-        Optional<String> lastName,
-        Optional<AdresseDTO> adresse,
-        Optional<ContactDTO> contact,
-        Optional<String> specialty
+        String firstName,
+        String lastName,
+        ContactDTO contact,
+        AdresseDTO adresse,
+        String gender,
+        LocalDate birthday,
+        String specialty
 ) {
 }

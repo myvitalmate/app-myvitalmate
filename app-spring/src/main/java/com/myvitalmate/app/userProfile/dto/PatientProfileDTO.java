@@ -4,6 +4,7 @@ package com.myvitalmate.app.userProfile.dto;
 import java.time.LocalDate;
 
 public record PatientProfileDTO(
+        Long id,
         String firstName,
         String lastName,
         ContactDTO contact,

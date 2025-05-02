@@ -12,6 +12,7 @@ public interface DietitianMapper {
     DietitianProfileDTO toDto(DietitianProfile entity);
 
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "id", ignore = true)
     DietitianProfile toEntity(DietitianProfileDTO dto);
 
     List<DietitianProfileDTO> toDtoList(List<DietitianProfile> entities);
