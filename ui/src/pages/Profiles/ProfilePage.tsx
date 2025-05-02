@@ -3,7 +3,7 @@ import {useEffect, useState} from "react"
 import {Loader2, Plus, User, Users} from "lucide-react"
 
 import {Button} from "@/components/ui/button"
-import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Input} from "@/components/ui/input"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 import {ScrollArea} from "@/components/ui/scroll-area"
@@ -53,6 +53,62 @@ type FormData = {
     sickness?: string
 }
 
+// Enhanced helper function to extract name from email with number filtering
+const extractNameFromEmail = (email: string): { firstName: string, lastName: string } => {
+    const defaultResult = { firstName: "", lastName: "" };
+    
+    if (!email || !email.includes('@')) {
+        return defaultResult;
+    }
+    
+    // Get the part before @
+    const beforeAt = email.split('@')[0];
+    
+    // Helper function to clean names (remove numbers and capitalize)
+    const cleanName = (name: string): string => {
+        // Remove all digits
+        const withoutNumbers = name.replace(/\d/g, '');
+        // Capitalize first letter
+        return withoutNumbers.charAt(0).toUpperCase() + withoutNumbers.slice(1);
+    };
+    
+    // Case 1: firstname.lastname format
+    if (beforeAt.includes('.')) {
+        const nameParts = beforeAt.split('.');
+        if (nameParts.length >= 2) {
+            const firstName = cleanName(nameParts[0]);
+            const lastName = cleanName(nameParts[1]);
+            return { firstName, lastName };
+        }
+    }
+    
+    // Case 2: firstname_lastname format
+    if (beforeAt.includes('_')) {
+        const nameParts = beforeAt.split('_');
+        if (nameParts.length >= 2) {
+            const firstName = cleanName(nameParts[0]);
+            const lastName = cleanName(nameParts[1]);
+            return { firstName, lastName };
+        }
+    }
+    
+    // Case 3: firstnamelastname format (camelCase)
+    const camelCaseMatch = beforeAt.match(/([a-z]+)([A-Z][a-z]+)/);
+    if (camelCaseMatch && camelCaseMatch.length >= 3) {
+        const firstName = cleanName(camelCaseMatch[1]);
+        const lastName = cleanName(camelCaseMatch[2]);
+        return { firstName, lastName };
+    }
+    
+    // Case 4: Just use the email username as the first name
+    if (beforeAt) {
+        const firstName = cleanName(beforeAt);
+        return { firstName, lastName: "" };
+    }
+    
+    return defaultResult;
+};
+
 const Profile = () => {
     const [userType, setUserType] = useState<UserType>("dietitian")
     const [dietitians, setDietitians] = useState<Profile[]>([])
@@ -70,18 +126,18 @@ const Profile = () => {
         firstName: "",
         lastName: "",
         email: "",
-        phoneNumber: "",
-        gender: "",
-        birthday: "",
-        street: "",
-        country: "",
-        city: "",
-        postalCode: "",
-        specialty: "",
-        dietOrientation: "",
-        currentWeight: "",
-        goals: "",
-        sickness: "",
+        phoneNumber: "+1",
+        gender: "Male",
+        birthday: new Date().toISOString().split('T')[0],
+        street: "123 Main St",
+        country: "United States",
+        city: "New York",
+        postalCode: "10001",
+        specialty: "Nutrition",
+        dietOrientation: "Balanced",
+        currentWeight: "70",
+        goals: "Maintain weight",
+        sickness: "None",
     })
 
     const [errors, setErrors] = useState<Record<string, string>>({})
@@ -124,22 +180,42 @@ const Profile = () => {
         fetchProfiles();
         setActiveView("view");
         setEditingProfile(null);
+        
+        // Get email from token and extract name
+        const token = localStorage.getItem('token');
+        let email = "";
+        let firstName = "";
+        let lastName = "";
+        
+        if (token) {
+            try {
+                const payload = token.split('.')[1];
+                const decodedPayload = JSON.parse(atob(payload));
+                email = decodedPayload.sub || "";
+                const nameData = extractNameFromEmail(email);
+                firstName = nameData.firstName;
+                lastName = nameData.lastName;
+            } catch (error) {
+                console.error("Error parsing token:", error);
+            }
+        }
+        
         setFormData({
-            firstName: "",
-            lastName: "",
-            email: "",
-            phoneNumber: "",
-            gender: "",
-            birthday: "",
-            street: "",
-            country: "",
-            city: "",
-            postalCode: "",
-            specialty: "",
-            dietOrientation: "",
-            currentWeight: "",
-            goals: "",
-            sickness: "",
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phoneNumber: "+1",
+            gender: "Male",
+            birthday: new Date().toISOString().split('T')[0],
+            street: "123 Main St",
+            country: "United States",
+            city: "New York",
+            postalCode: "10001",
+            specialty: "Nutrition",
+            dietOrientation: "Balanced",
+            currentWeight: "70",
+            goals: "Maintain weight",
+            sickness: "None",
         });
         setErrors({});
     }, [userRole, refreshKey]);
@@ -152,6 +228,16 @@ const Profile = () => {
                     const payload = token.split('.')[1];
                     const decodedPayload = JSON.parse(atob(payload));
                     setUserRole(decodedPayload.role);
+                    
+                    const email = decodedPayload.sub || "";
+                    const { firstName, lastName } = extractNameFromEmail(email);
+                    
+                    setFormData(prev => ({
+                        ...prev,
+                        email: email,
+                        firstName: firstName,
+                        lastName: lastName
+                    }));
 
                     if (decodedPayload.role === 'PATIENT') {
                         setUserType('patient');
@@ -269,22 +355,42 @@ const Profile = () => {
     const handleCancel = () => {
         setActiveView("view");
         setEditingProfile(null);
+        
+        // Get email from token and extract name
+        const token = localStorage.getItem('token');
+        let email = "";
+        let firstName = "";
+        let lastName = "";
+        
+        if (token) {
+            try {
+                const payload = token.split('.')[1];
+                const decodedPayload = JSON.parse(atob(payload));
+                email = decodedPayload.sub || "";
+                const nameData = extractNameFromEmail(email);
+                firstName = nameData.firstName;
+                lastName = nameData.lastName;
+            } catch (error) {
+                console.error("Error parsing token:", error);
+            }
+        }
+        
         setFormData({
-            firstName: "",
-            lastName: "",
-            email: "",
-            phoneNumber: "",
-            gender: "",
-            birthday: "",
-            street: "",
-            country: "",
-            city: "",
-            postalCode: "",
-            specialty: "",
-            dietOrientation: "",
-            currentWeight: "",
-            goals: "",
-            sickness: "",
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phoneNumber: "+1",
+            gender: "Male",
+            birthday: new Date().toISOString().split('T')[0],
+            street: "123 Main St",
+            country: "United States",
+            city: "New York",
+            postalCode: "10001",
+            specialty: "Nutrition",
+            dietOrientation: "Balanced",
+            currentWeight: "70",
+            goals: "Maintain weight",
+            sickness: "None",
         });
         setErrors({});
     };
@@ -292,13 +398,12 @@ const Profile = () => {
     const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
 
     const handleEdit = (profile: Profile) => {
-        // Set the user type based on the profile being edited
         if (profile.specialty) {
             setUserType("dietitian");
         } else {
             setUserType("patient");
         }
-        
+
         setEditingProfile(profile);
         setActiveView("create");
 
@@ -417,24 +522,44 @@ const Profile = () => {
                 );
                 setMessageType("success");
                 setEditingProfile(null);
+                
+                // Get email from token and extract name
+                const token = localStorage.getItem('token');
+                let email = "";
+                let firstName = "";
+                let lastName = "";
+                
+                if (token) {
+                    try {
+                        const payload = token.split('.')[1];
+                        const decodedPayload = JSON.parse(atob(payload));
+                        email = decodedPayload.sub || "";
+                        const nameData = extractNameFromEmail(email);
+                        firstName = nameData.firstName;
+                        lastName = nameData.lastName;
+                    } catch (error) {
+                        console.error("Error parsing token:", error);
+                    }
+                }
 
                 setFormData({
-                    firstName: "",
-                    lastName: "",
-                    email: "",
-                    phoneNumber: "",
-                    gender: "",
-                    birthday: "",
-                    street: "",
-                    country: "",
-                    city: "",
-                    postalCode: "",
-                    specialty: "",
-                    dietOrientation: "",
-                    currentWeight: "",
-                    goals: "",
-                    sickness: "",
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    phoneNumber: "+1",
+                    gender: "Male",
+                    birthday: new Date().toISOString().split('T')[0],
+                    street: "123 Main St",
+                    country: "United States",
+                    city: "New York",
+                    postalCode: "10001",
+                    specialty: "Nutrition",
+                    dietOrientation: "Balanced",
+                    currentWeight: "70",
+                    goals: "Maintain weight",
+                    sickness: "None",
                 });
+                setErrors({});
 
                 await fetchProfiles();
 
@@ -941,8 +1066,8 @@ const Profile = () => {
                                     )}
 
                                     <div className="flex justify-between mt-6">
-                                        <Button 
-                                            variant="outline" 
+                                        <Button
+                                            variant="outline"
                                             onClick={handleCancel}
                                         >
                                             Cancel
