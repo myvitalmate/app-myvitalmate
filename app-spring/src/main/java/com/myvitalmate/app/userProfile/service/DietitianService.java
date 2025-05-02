@@ -53,14 +53,6 @@ public class DietitianService {
         validationService.validateBirthday(dto.birthday());
 
         validationService.validateSpecialty(dto.specialty());
-
-        if (repository.existingContactData(
-                dto.contact().email(),
-                dto.contact().phoneNumber()
-        )) {
-            throw new ValidationException("A profile with the same email, phone number, or address already exists.");
-        }
-
         DietitianProfile dietitian = dietitianMapper.toEntity(dto);
         dietitian.setUser(getCurrentUser());
         repository.save(dietitian);
@@ -120,7 +112,6 @@ public class DietitianService {
         validationService.validateBirthday(dto.birthday());
         validationService.validateSpecialty(dto.specialty());
 
-        // Update all fields
         dietitian.setFirstName(dto.firstName());
         dietitian.setLastName(dto.lastName());
         dietitian.setAdresse(new Adresse(dto.adresse()));

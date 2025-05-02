@@ -60,13 +60,6 @@ public class PatientService {
         validationService.validateSickness(dto.sickness());
         validationService.validateGoals(dto.goals());
 
-        if (repository.existingContactData(
-                dto.contact().email(),
-                dto.contact().phoneNumber()
-        )) {
-            throw new ValidationException("A profile with the same email, phone number, or address already exists.");
-        }
-
         PatientProfile patient = patientMapper.toEntity(dto);
         patient.setUser(getCurrentUser());
         repository.save(patient);
