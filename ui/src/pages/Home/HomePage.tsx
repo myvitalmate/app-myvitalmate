@@ -2,8 +2,7 @@ import {useState} from "react";
 import {Button} from "@/components/ui/button.tsx";
 import {Input} from "@/components/ui/input.tsx";
 
-//const BASE_URL = 'http://127.0.0.1:8000';
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const fetchResponse = async (searchQuery: string) => {
     const response = await fetch(`${BASE_URL}/health/check/?query=${encodeURIComponent(searchQuery)}`);
