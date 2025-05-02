@@ -1,6 +1,7 @@
 FROM openjdk:23-slim AS builder
 WORKDIR /app
 COPY . .
+RUN chmod +x ./gradlew
 RUN ./gradlew bootJar
 
 FROM openjdk:23-slim
