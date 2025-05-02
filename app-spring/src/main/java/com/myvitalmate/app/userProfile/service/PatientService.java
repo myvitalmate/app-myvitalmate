@@ -114,13 +114,32 @@ public class PatientService {
             throw new RuntimeException("You don't have permission to update this profile");
         }
 
-        dto.lastName().ifPresent(patient::setLastName);
-        dto.adresse().ifPresent(a -> patient.setAdresse(new Adresse(a)));
-        dto.contact().ifPresent(c -> patient.setContact(new Contact(c)));
-        dto.dietOrientation().ifPresent(patient::setDietOrientation);
-        dto.currentWeight().ifPresent(patient::setCurrentWeight);
-        dto.sickness().ifPresent(patient::setSickness);
-        dto.goals().ifPresent(patient::setGoals);
+        validationService.validateFirstName(dto.firstName());
+        validationService.validateLastName(dto.lastName());
+        validationService.validateCity(dto.adresse().city());
+        validationService.validateStreet(dto.adresse().street());
+        validationService.validateCountry(dto.adresse().country());
+        validationService.validatePostalcode(dto.adresse().postalCode());
+        validationService.validateEmail(dto.contact().email());
+        validationService.validatePhoneNumber(dto.contact().phoneNumber());
+        validationService.validateGender(dto.gender());
+        validationService.validateBirthday(dto.birthday());
+        validationService.validateDietOrientation(dto.dietOrientation());
+        validationService.validateCurrentWeight(dto.currentWeight());
+        validationService.validateSickness(dto.sickness());
+        validationService.validateGoals(dto.goals());
+
+        // Update all fields
+        patient.setFirstName(dto.firstName());
+        patient.setLastName(dto.lastName());
+        patient.setAdresse(new Adresse(dto.adresse()));
+        patient.setContact(new Contact(dto.contact()));
+        patient.setGender(dto.gender());
+        patient.setBirthday(dto.birthday());
+        patient.setDietOrientation(dto.dietOrientation());
+        patient.setCurrentWeight(dto.currentWeight());
+        patient.setSickness(dto.sickness());
+        patient.setGoals(dto.goals());
 
         repository.save(patient);
     }

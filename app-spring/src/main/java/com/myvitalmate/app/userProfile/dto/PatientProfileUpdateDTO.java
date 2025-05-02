@@ -1,14 +1,17 @@
 package com.myvitalmate.app.userProfile.dto;
 
-import java.util.Optional;
+import java.time.LocalDate;
 
 public record PatientProfileUpdateDTO(
-        Optional<String> lastName,
-        Optional<AdresseDTO> adresse,
-        Optional<ContactDTO> contact,
-        Optional<String> dietOrientation,
-        Optional<String> currentWeight,
-        Optional<String> sickness,
-        Optional<String> goals
+        String firstName,
+        String lastName,
+        ContactDTO contact,
+        AdresseDTO adresse,
+        String gender,
+        LocalDate birthday,
+        String dietOrientation,
+        String currentWeight,
+        String goals,
+        String sickness
 ) {
 }

@@ -34,7 +34,7 @@ public class PatientController {
         return ResponseEntity.ok().build();
     }
 
-    @PatchMapping("/update/{id}")
+    @PutMapping("/update/{id}")
     public ResponseEntity<?> updatePatientProfile(
             @PathVariable Long id,
             @RequestBody PatientProfileUpdateDTO dto
