@@ -86,11 +86,9 @@ const Profile = () => {
 
     const [errors, setErrors] = useState<Record<string, string>>({})
 
-    // Create a reusable function to fetch profiles
     const fetchProfiles = async () => {
         setIsLoading(true);
         try {
-            // Reset all state variables
             setDietitians([]);
             setPatients([]);
             setHasDietitianProfile(false);
@@ -124,7 +122,6 @@ const Profile = () => {
 
     useEffect(() => {
         fetchProfiles();
-        // Reset form and UI state when refreshKey changes
         setActiveView("view");
         setEditingProfile(null);
         setFormData({
@@ -244,9 +241,9 @@ const Profile = () => {
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
-    const handleDelete = async (id: number) => {
+    const handleDelete = async (id: number, profileType: "dietitian" | "patient") => {
         try {
-            const response = await fetch(`${BASE_URL}/${userType}s/delete?id=${id}`, {
+            const response = await fetch(`${BASE_URL}/${profileType}s/delete?id=${id}`, {
                 method: "DELETE",
                 headers: {
                     "Authorization": `Bearer ${localStorage.getItem('token')}`,
@@ -255,10 +252,8 @@ const Profile = () => {
             });
 
             if (response.ok) {
-                setResponseMessage(`${userType.charAt(0).toUpperCase() + userType.slice(1)} profile deleted successfully`);
+                setResponseMessage(`${profileType.charAt(0).toUpperCase() + profileType.slice(1)} profile deleted successfully`);
                 setMessageType("success");
-
-                // Trigger a full component refresh
                 setRefreshKey(prevKey => prevKey + 1);
             } else {
                 const data = await response.json();
@@ -271,9 +266,39 @@ const Profile = () => {
         }
     };
 
+    const handleCancel = () => {
+        setActiveView("view");
+        setEditingProfile(null);
+        setFormData({
+            firstName: "",
+            lastName: "",
+            email: "",
+            phoneNumber: "",
+            gender: "",
+            birthday: "",
+            street: "",
+            country: "",
+            city: "",
+            postalCode: "",
+            specialty: "",
+            dietOrientation: "",
+            currentWeight: "",
+            goals: "",
+            sickness: "",
+        });
+        setErrors({});
+    };
+
     const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
 
     const handleEdit = (profile: Profile) => {
+        // Set the user type based on the profile being edited
+        if (profile.specialty) {
+            setUserType("dietitian");
+        } else {
+            setUserType("patient");
+        }
+        
         setEditingProfile(profile);
         setActiveView("create");
 
@@ -304,7 +329,6 @@ const Profile = () => {
 
         const isEditing = !!editingProfile;
 
-        // Create the appropriate DTO based on whether we're creating or updating
         const userDTO = isEditing
             ? {
                 firstName: formData.firstName,
@@ -519,7 +543,7 @@ const Profile = () => {
                                                             <Button
                                                                 variant="destructive"
                                                                 size="sm"
-                                                                onClick={() => handleDelete(dietitian.id)}
+                                                                onClick={() => handleDelete(dietitian.id, "dietitian")}
                                                             >
                                                                 Delete
                                                             </Button>
@@ -594,7 +618,7 @@ const Profile = () => {
                                                             <Button
                                                                 variant="destructive"
                                                                 size="sm"
-                                                                onClick={() => handleDelete(patient.id)}
+                                                                onClick={() => handleDelete(patient.id, "patient")}
                                                             >
                                                                 Delete
                                                             </Button>
@@ -622,8 +646,9 @@ const Profile = () => {
                             <div className="text-sm text-muted-foreground">
                                 {editingProfile ? "Update the" : "Fill in the"} details {editingProfile ? "to update the" : "to create a new"} profile
                             </div>
-                            <div className="pt-2">
-                                {userRole !== 'PATIENT' ? (
+                            {/* Only show user type selector when creating a new profile */}
+                            {!editingProfile && userRole !== 'PATIENT' && (
+                                <div className="pt-2">
                                     <Select value={userType} onValueChange={(value: UserType) => setUserType(value)}>
                                         <SelectTrigger className="w-[180px]">
                                             <SelectValue placeholder="Select user type"/>
@@ -633,12 +658,8 @@ const Profile = () => {
                                             <SelectItem value="patient">Patient</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                ) : (
-                                    <div className="text-sm text-muted-foreground">
-                                        Creating patient profile
-                                    </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </CardHeader>
                         <CardContent>
                             {userRole === 'PATIENT' && hasPatientProfile && !editingProfile ? (
@@ -919,11 +940,17 @@ const Profile = () => {
                                         </div>
                                     )}
 
-                                    <CardFooter className="px-0 pb-0">
-                                        <Button type="submit" className="w-full">
+                                    <div className="flex justify-between mt-6">
+                                        <Button 
+                                            variant="outline" 
+                                            onClick={handleCancel}
+                                        >
+                                            Cancel
+                                        </Button>
+                                        <Button type="submit" onClick={handleSubmit}>
                                             {editingProfile ? "Update" : "Create"} Profile
                                         </Button>
-                                    </CardFooter>
+                                    </div>
                                 </form>
                             )}
                         </CardContent>
