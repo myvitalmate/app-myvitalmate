@@ -12,6 +12,7 @@ public interface PatientMapper {
     PatientProfileDTO toDto(PatientProfile entity);
 
     @Mapping(target = "user", ignore = true)
+    @Mapping(target = "id", ignore = true)
     PatientProfile toEntity(PatientProfileDTO dto);
 
     List<PatientProfileDTO> toDtoList(List<PatientProfile> entities);

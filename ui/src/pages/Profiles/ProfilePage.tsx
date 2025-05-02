@@ -1,10 +1,9 @@
-
 import type React from "react"
 import {useEffect, useState} from "react"
 import {Loader2, Plus, User, Users} from "lucide-react"
 
 import {Button} from "@/components/ui/button"
-import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Input} from "@/components/ui/input"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 import {ScrollArea} from "@/components/ui/scroll-area"
@@ -54,6 +53,62 @@ type FormData = {
     sickness?: string
 }
 
+// Enhanced helper function to extract name from email with number filtering
+const extractNameFromEmail = (email: string): { firstName: string, lastName: string } => {
+    const defaultResult = { firstName: "", lastName: "" };
+    
+    if (!email || !email.includes('@')) {
+        return defaultResult;
+    }
+    
+    // Get the part before @
+    const beforeAt = email.split('@')[0];
+    
+    // Helper function to clean names (remove numbers and capitalize)
+    const cleanName = (name: string): string => {
+        // Remove all digits
+        const withoutNumbers = name.replace(/\d/g, '');
+        // Capitalize first letter
+        return withoutNumbers.charAt(0).toUpperCase() + withoutNumbers.slice(1);
+    };
+    
+    // Case 1: firstname.lastname format
+    if (beforeAt.includes('.')) {
+        const nameParts = beforeAt.split('.');
+        if (nameParts.length >= 2) {
+            const firstName = cleanName(nameParts[0]);
+            const lastName = cleanName(nameParts[1]);
+            return { firstName, lastName };
+        }
+    }
+    
+    // Case 2: firstname_lastname format
+    if (beforeAt.includes('_')) {
+        const nameParts = beforeAt.split('_');
+        if (nameParts.length >= 2) {
+            const firstName = cleanName(nameParts[0]);
+            const lastName = cleanName(nameParts[1]);
+            return { firstName, lastName };
+        }
+    }
+    
+    // Case 3: firstnamelastname format (camelCase)
+    const camelCaseMatch = beforeAt.match(/([a-z]+)([A-Z][a-z]+)/);
+    if (camelCaseMatch && camelCaseMatch.length >= 3) {
+        const firstName = cleanName(camelCaseMatch[1]);
+        const lastName = cleanName(camelCaseMatch[2]);
+        return { firstName, lastName };
+    }
+    
+    // Case 4: Just use the email username as the first name
+    if (beforeAt) {
+        const firstName = cleanName(beforeAt);
+        return { firstName, lastName: "" };
+    }
+    
+    return defaultResult;
+};
+
 const Profile = () => {
     const [userType, setUserType] = useState<UserType>("dietitian")
     const [dietitians, setDietitians] = useState<Profile[]>([])
@@ -65,75 +120,125 @@ const Profile = () => {
     const [userRole, setUserRole] = useState<string | null>(null)
     const [hasPatientProfile, setHasPatientProfile] = useState<boolean>(false)
     const [hasDietitianProfile, setHasDietitianProfile] = useState<boolean>(false)
+    const [refreshKey, setRefreshKey] = useState(0)
 
     const [formData, setFormData] = useState<FormData>({
         firstName: "",
         lastName: "",
         email: "",
-        phoneNumber: "",
-        gender: "",
-        birthday: "",
-        street: "",
-        country: "",
-        city: "",
-        postalCode: "",
-        specialty: "",
-        dietOrientation: "",
-        currentWeight: "",
-        goals: "",
-        sickness: "",
+        phoneNumber: "+1",
+        gender: "Male",
+        birthday: new Date().toISOString().split('T')[0],
+        street: "123 Main St",
+        country: "United States",
+        city: "New York",
+        postalCode: "10001",
+        specialty: "Nutrition",
+        dietOrientation: "Balanced",
+        currentWeight: "70",
+        goals: "Maintain weight",
+        sickness: "None",
     })
 
     const [errors, setErrors] = useState<Record<string, string>>({})
 
-    useEffect(() => {
-        const fetchProfiles = async () => {
-            setIsLoading(true)
-            try {
-                const dietitiansResponse = await fetch(`${BASE_URL}/dietitians/viewAll`)
-                if (dietitiansResponse.ok) {
-                    const dietitiansData = await dietitiansResponse.json()
-                    setDietitians(dietitiansData || [])
-                    
-                    // Check if user is a DIETITIAN and already has a profile
-                    if (userRole === 'DIETITIAN' && dietitiansData.length > 0) {
-                        setHasDietitianProfile(true)
-                    }
-                }
+    const fetchProfiles = async () => {
+        setIsLoading(true);
+        try {
+            setDietitians([]);
+            setPatients([]);
+            setHasDietitianProfile(false);
+            setHasPatientProfile(false);
 
-                const patientsResponse = await fetch(`${BASE_URL}/patients/viewAll`)
-                if (patientsResponse.ok) {
-                    const patientsData: Profile[] = await patientsResponse.json()
-                    setPatients(patientsData)
-                    
-                    // Only check for existing profile if user is a PATIENT
-                    if (userRole === 'PATIENT' && patientsData.length > 0) {
-                        setHasPatientProfile(true)
-                    }
+            const dietitiansResponse = await fetch(`${BASE_URL}/dietitians/viewAll`);
+            if (dietitiansResponse.ok) {
+                const dietitiansData = await dietitiansResponse.json();
+                setDietitians(dietitiansData || []);
+                if (userRole === 'DIETITIAN' && dietitiansData.length > 0) {
+                    setHasDietitianProfile(true);
                 }
+            }
+
+            const patientsResponse = await fetch(`${BASE_URL}/patients/viewAll`);
+            if (patientsResponse.ok) {
+                const patientsData = await patientsResponse.json();
+                setPatients(patientsData || []);
+                if (userRole === 'PATIENT' && patientsData.length > 0) {
+                    setHasPatientProfile(true);
+                }
+            }
+        } catch (error) {
+            console.error("Error fetching profiles:", error);
+            setResponseMessage("Failed to load profiles. Please try again later.");
+            setMessageType("error");
+        } finally {
+            setIsLoading(false);
+        }
+    };
+
+    useEffect(() => {
+        fetchProfiles();
+        setActiveView("view");
+        setEditingProfile(null);
+        
+        // Get email from token and extract name
+        const token = localStorage.getItem('token');
+        let email = "";
+        let firstName = "";
+        let lastName = "";
+        
+        if (token) {
+            try {
+                const payload = token.split('.')[1];
+                const decodedPayload = JSON.parse(atob(payload));
+                email = decodedPayload.sub || "";
+                const nameData = extractNameFromEmail(email);
+                firstName = nameData.firstName;
+                lastName = nameData.lastName;
             } catch (error) {
-                console.error("Error fetching profiles:", error)
-                setResponseMessage("Failed to load profiles. Please try again later.")
-                setMessageType("error")
-            } finally {
-                setIsLoading(false)
+                console.error("Error parsing token:", error);
             }
         }
-
-        fetchProfiles()
-    }, [userRole])
+        
+        setFormData({
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phoneNumber: "+1",
+            gender: "Male",
+            birthday: new Date().toISOString().split('T')[0],
+            street: "123 Main St",
+            country: "United States",
+            city: "New York",
+            postalCode: "10001",
+            specialty: "Nutrition",
+            dietOrientation: "Balanced",
+            currentWeight: "70",
+            goals: "Maintain weight",
+            sickness: "None",
+        });
+        setErrors({});
+    }, [userRole, refreshKey]);
 
     useEffect(() => {
         const fetchUserRole = () => {
             const token = localStorage.getItem('token');
             if (token) {
                 try {
-                    // JWT tokens are in format: header.payload.signature
                     const payload = token.split('.')[1];
                     const decodedPayload = JSON.parse(atob(payload));
                     setUserRole(decodedPayload.role);
                     
-                    // If user is PATIENT, force userType to patient
+                    const email = decodedPayload.sub || "";
+                    const { firstName, lastName } = extractNameFromEmail(email);
+                    
+                    setFormData(prev => ({
+                        ...prev,
+                        email: email,
+                        firstName: firstName,
+                        lastName: lastName
+                    }));
+
                     if (decodedPayload.role === 'PATIENT') {
                         setUserType('patient');
                     }
@@ -222,119 +327,266 @@ const Profile = () => {
         setErrors(newErrors)
         return Object.keys(newErrors).length === 0
     }
-
-    const handleSubmit = async (e: React.FormEvent) => {
-        e.preventDefault()
-
-        if (!validateForm()) {
-            return
-        }
-
-        const userDTO = {
-            firstName: formData.firstName,
-            lastName: formData.lastName,
-            gender: formData.gender,
-            birthday: formData.birthday,
-            contact: {
-                phoneNumber: formData.phoneNumber,
-                email: formData.email,
-            },
-            adresse: {
-                street: formData.street,
-                city: formData.city,
-                postalCode: formData.postalCode,
-                country: formData.country,
-            },
-            ...(userType === "dietitian" && {
-                specialty: formData.specialty,
-            }),
-            ...(userType === "patient" && {
-                dietOrientation: formData.dietOrientation,
-                currentWeight: formData.currentWeight,
-                goals: formData.goals,
-                sickness: formData.sickness,
-            }),
-        }
-
+    const handleDelete = async (id: number, profileType: "dietitian" | "patient") => {
         try {
-            const response = await fetch(`${BASE_URL}/${userType}s/create`, {
-                method: "POST",
+            const response = await fetch(`${BASE_URL}/${profileType}s/delete?id=${id}`, {
+                method: "DELETE",
                 headers: {
-                    "Content-Type": "application/json",
-                },
-                body: JSON.stringify(userDTO),
-            })
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`,
+                    "Content-Type": "application/json"
+                }
+            });
 
             if (response.ok) {
-                setResponseMessage(`${userType.charAt(0).toUpperCase() + userType.slice(1)} profile created successfully!`)
-                setMessageType("success")
-
-                setFormData({
-                    firstName: "",
-                    lastName: "",
-                    email: "",
-                    phoneNumber: "",
-                    gender: "",
-                    birthday: "",
-                    street: "",
-                    country: "",
-                    city: "",
-                    postalCode: "",
-                    specialty: "",
-                    dietOrientation: "",
-                    currentWeight: "",
-                    goals: "",
-                    sickness: "",
-                })
-
-                // Refresh profiles data to update permission states
-                try {
-                    // Refresh dietitian profiles
-                    const dietitiansResponse = await fetch(`${BASE_URL}/dietitians/viewAll`)
-                    if (dietitiansResponse.ok) {
-                        const dietitiansData = await dietitiansResponse.json()
-                        setDietitians(dietitiansData || [])
-
-                        // Update dietitian profile status
-                        if (userRole === 'DIETITIAN' && dietitiansData.length > 0) {
-                            setHasDietitianProfile(true)
-                        }
-                    }
-
-                    // Refresh patient profiles
-                    const patientsResponse = await fetch(`${BASE_URL}/patients/viewAll`)
-                    if (patientsResponse.ok) {
-                        const patientsData = await patientsResponse.json()
-                        setPatients(patientsData || [])
-
-                        // Update patient profile status
-                        if (userRole === 'PATIENT' && patientsData.length > 0) {
-                            setHasPatientProfile(true)
-                        }
-                    }
-
-                    // Switch to view mode after successful creation
-                    setActiveView("view")
-                } catch (error) {
-                    console.error("Error refreshing profiles:", error)
-                }
+                setResponseMessage(`${profileType.charAt(0).toUpperCase() + profileType.slice(1)} profile deleted successfully`);
+                setMessageType("success");
+                setRefreshKey(prevKey => prevKey + 1);
             } else {
-                const contentType = response.headers.get("content-type")
-                let errorMessage = "Something went wrong"
-
-                if (contentType && contentType.includes("application/json")) {
-                    const data = await response.json()
-                    errorMessage = data.message || errorMessage
-                }
-
-                setResponseMessage(errorMessage)
-                setMessageType("error")
+                const data = await response.json();
+                setResponseMessage(data.message || "Failed to delete profile");
+                setMessageType("error");
             }
         } catch (error) {
-            setResponseMessage("Network error. Please try again.")
-            setMessageType("error")
+            setResponseMessage("Network error while deleting profile.");
+            setMessageType("error");
         }
-    }
+    };
+
+    const handleCancel = () => {
+        setActiveView("view");
+        setEditingProfile(null);
+        
+        // Get email from token and extract name
+        const token = localStorage.getItem('token');
+        let email = "";
+        let firstName = "";
+        let lastName = "";
+        
+        if (token) {
+            try {
+                const payload = token.split('.')[1];
+                const decodedPayload = JSON.parse(atob(payload));
+                email = decodedPayload.sub || "";
+                const nameData = extractNameFromEmail(email);
+                firstName = nameData.firstName;
+                lastName = nameData.lastName;
+            } catch (error) {
+                console.error("Error parsing token:", error);
+            }
+        }
+        
+        setFormData({
+            firstName: firstName,
+            lastName: lastName,
+            email: email,
+            phoneNumber: "+1",
+            gender: "Male",
+            birthday: new Date().toISOString().split('T')[0],
+            street: "123 Main St",
+            country: "United States",
+            city: "New York",
+            postalCode: "10001",
+            specialty: "Nutrition",
+            dietOrientation: "Balanced",
+            currentWeight: "70",
+            goals: "Maintain weight",
+            sickness: "None",
+        });
+        setErrors({});
+    };
+
+    const [editingProfile, setEditingProfile] = useState<Profile | null>(null);
+
+    const handleEdit = (profile: Profile) => {
+        if (profile.specialty) {
+            setUserType("dietitian");
+        } else {
+            setUserType("patient");
+        }
+
+        setEditingProfile(profile);
+        setActiveView("create");
+
+        setFormData({
+            firstName: profile.firstName,
+            lastName: profile.lastName,
+            email: profile.contact.email,
+            phoneNumber: profile.contact.phoneNumber,
+            gender: profile.gender,
+            birthday: profile.birthday,
+            street: profile.adresse.street,
+            country: profile.adresse.country,
+            city: profile.adresse.city,
+            postalCode: profile.adresse.postalCode,
+            specialty: profile.specialty || "",
+            dietOrientation: profile.dietOrientation || "",
+            currentWeight: profile.currentWeight || "",
+            goals: profile.goals || "",
+            sickness: profile.sickness || "",
+        });
+    };
+
+
+    const handleSubmit = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        if (!validateForm()) return;
+
+        const isEditing = !!editingProfile;
+
+        const userDTO = isEditing
+            ? {
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                gender: formData.gender,
+                birthday: formData.birthday,
+                contact: {
+                    phoneNumber: formData.phoneNumber,
+                    email: formData.email,
+                },
+                adresse: {
+                    street: formData.street,
+                    city: formData.city,
+                    postalCode: formData.postalCode,
+                    country: formData.country,
+                },
+                ...(userType === "dietitian" && {
+                    specialty: formData.specialty,
+                }),
+                ...(userType === "patient" && {
+                    dietOrientation: formData.dietOrientation,
+                    currentWeight: formData.currentWeight,
+                    goals: formData.goals,
+                    sickness: formData.sickness,
+                }),
+            }
+            : {
+                id: null,
+                firstName: formData.firstName,
+                lastName: formData.lastName,
+                gender: formData.gender,
+                birthday: formData.birthday,
+                contact: {
+                    phoneNumber: formData.phoneNumber,
+                    email: formData.email,
+                },
+                adresse: {
+                    street: formData.street,
+                    city: formData.city,
+                    postalCode: formData.postalCode,
+                    country: formData.country,
+                },
+                ...(userType === "dietitian" && {
+                    specialty: formData.specialty,
+                }),
+                ...(userType === "patient" && {
+                    dietOrientation: formData.dietOrientation,
+                    currentWeight: formData.currentWeight,
+                    goals: formData.goals,
+                    sickness: formData.sickness,
+                }),
+            };
+
+        const method = isEditing ? "PUT" : "POST";
+        const endpoint = isEditing
+            ? `${BASE_URL}/${userType}s/update/${editingProfile!.id}`
+            : `${BASE_URL}/${userType}s/create`;
+
+        console.log("Request method:", method);
+        console.log("Request URL:", endpoint);
+        console.log("Request payload:", JSON.stringify(userDTO, null, 2));
+
+        try {
+            const response = await fetch(endpoint, {
+                method,
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(userDTO),
+            });
+
+            console.log("Response status:", response.status);
+
+            let responseText = "";
+            try {
+                responseText = await response.text();
+                console.log("Response text:", responseText);
+            } catch (e) {
+                console.error("Error reading response text:", e);
+            }
+
+            if (response.ok) {
+                setResponseMessage(
+                    `${userType.charAt(0).toUpperCase() + userType.slice(1)} profile ${isEditing ? "updated" : "created"} successfully!`
+                );
+                setMessageType("success");
+                setEditingProfile(null);
+                
+                // Get email from token and extract name
+                const token = localStorage.getItem('token');
+                let email = "";
+                let firstName = "";
+                let lastName = "";
+                
+                if (token) {
+                    try {
+                        const payload = token.split('.')[1];
+                        const decodedPayload = JSON.parse(atob(payload));
+                        email = decodedPayload.sub || "";
+                        const nameData = extractNameFromEmail(email);
+                        firstName = nameData.firstName;
+                        lastName = nameData.lastName;
+                    } catch (error) {
+                        console.error("Error parsing token:", error);
+                    }
+                }
+
+                setFormData({
+                    firstName: firstName,
+                    lastName: lastName,
+                    email: email,
+                    phoneNumber: "+1",
+                    gender: "Male",
+                    birthday: new Date().toISOString().split('T')[0],
+                    street: "123 Main St",
+                    country: "United States",
+                    city: "New York",
+                    postalCode: "10001",
+                    specialty: "Nutrition",
+                    dietOrientation: "Balanced",
+                    currentWeight: "70",
+                    goals: "Maintain weight",
+                    sickness: "None",
+                });
+                setErrors({});
+
+                await fetchProfiles();
+
+                setActiveView("view");
+            } else {
+                let errorMessage = "Something went wrong";
+
+                try {
+                    if (responseText) {
+                        const data = JSON.parse(responseText);
+                        errorMessage = data.message || errorMessage;
+                    }
+                } catch (e) {
+                    console.error("Error parsing response JSON:", e);
+                    errorMessage = responseText || errorMessage;
+                }
+
+                setResponseMessage(`Error (${response.status}): ${errorMessage}`);
+                setMessageType("error");
+            }
+        } catch (error) {
+            console.error("Network error:", error);
+            setResponseMessage("Network error. Please try again.");
+            setMessageType("error");
+        }
+    };
+
 
     return (
         <div className="container mx-auto py-6">
@@ -387,7 +639,7 @@ const Profile = () => {
                                         <div className="px-4">
                                             {dietitians.map((dietitian, index) => (
                                                 <div key={dietitian.id || index} className="py-3">
-                                                    <div className="flex items-start gap-3">
+                                                    <div className="flex items-start justify-between gap-3">
                                                         <div className="space-y-1">
                                                             <h4 className="font-medium leading-none">
                                                                 {dietitian.firstName} {dietitian.lastName}
@@ -404,6 +656,22 @@ const Profile = () => {
                                                                 <span
                                                                     className="text-xs px-2 py-1 rounded-md border">{dietitian.gender}</span>
                                                             </div>
+                                                        </div>
+                                                        <div className="flex gap-2">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => handleEdit(dietitian)}
+                                                            >
+                                                                Edit
+                                                            </Button>
+                                                            <Button
+                                                                variant="destructive"
+                                                                size="sm"
+                                                                onClick={() => handleDelete(dietitian.id, "dietitian")}
+                                                            >
+                                                                Delete
+                                                            </Button>
                                                         </div>
                                                     </div>
                                                     {index < dietitians.length - 1 &&
@@ -442,7 +710,7 @@ const Profile = () => {
                                         <div className="px-4">
                                             {patients.map((patient, index) => (
                                                 <div key={patient.id || index} className="py-3">
-                                                    <div className="flex items-start gap-3">
+                                                    <div className="flex items-start justify-between gap-3">
                                                         <div className="space-y-1">
                                                             <h4 className="font-medium leading-none">
                                                                 {patient.firstName} {patient.lastName}
@@ -464,6 +732,22 @@ const Profile = () => {
                                                                 )}
                                                             </div>
                                                         </div>
+                                                        <div className="flex gap-2">
+                                                            <Button
+                                                                variant="outline"
+                                                                size="sm"
+                                                                onClick={() => handleEdit(patient)}
+                                                            >
+                                                                Edit
+                                                            </Button>
+                                                            <Button
+                                                                variant="destructive"
+                                                                size="sm"
+                                                                onClick={() => handleDelete(patient.id, "patient")}
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                     {index < patients.length - 1 &&
                                                         <div className="h-px bg-border mt-3"></div>}
@@ -482,12 +766,14 @@ const Profile = () => {
                         <CardHeader>
                             <CardTitle className="flex items-center gap-2">
                                 <Plus className="h-5 w-5"/>
-                                Create {userType.charAt(0).toUpperCase() + userType.slice(1)} Profile
+                                {editingProfile ? "Edit" : "Create"} {userType.charAt(0).toUpperCase() + userType.slice(1)} Profile
                             </CardTitle>
-                            <div className="text-sm text-muted-foreground">Fill in the details to create a new profile
+                            <div className="text-sm text-muted-foreground">
+                                {editingProfile ? "Update the" : "Fill in the"} details {editingProfile ? "to update the" : "to create a new"} profile
                             </div>
-                            <div className="pt-2">
-                                {userRole !== 'PATIENT' ? (
+                            {/* Only show user type selector when creating a new profile */}
+                            {!editingProfile && userRole !== 'PATIENT' && (
+                                <div className="pt-2">
                                     <Select value={userType} onValueChange={(value: UserType) => setUserType(value)}>
                                         <SelectTrigger className="w-[180px]">
                                             <SelectValue placeholder="Select user type"/>
@@ -497,19 +783,15 @@ const Profile = () => {
                                             <SelectItem value="patient">Patient</SelectItem>
                                         </SelectContent>
                                     </Select>
-                                ) : (
-                                    <div className="text-sm text-muted-foreground">
-                                        Creating patient profile
-                                    </div>
-                                )}
-                            </div>
+                                </div>
+                            )}
                         </CardHeader>
                         <CardContent>
-                            {userRole === 'PATIENT' && hasPatientProfile ? (
+                            {userRole === 'PATIENT' && hasPatientProfile && !editingProfile ? (
                                 <div className="p-4 rounded-md bg-amber-100 text-amber-700">
                                     As a patient, you can only create one profile.
                                 </div>
-                            ) : userRole === 'DIETITIAN' && userType === 'dietitian' && hasDietitianProfile ? (
+                            ) : userRole === 'DIETITIAN' && userType === 'dietitian' && hasDietitianProfile && !editingProfile ? (
                                 <div className="p-4 rounded-md bg-amber-100 text-amber-700">
                                     You already have a dietitian profile. You can only create patient profiles.
                                 </div>
@@ -528,7 +810,8 @@ const Profile = () => {
                                                 onChange={handleChange}
                                                 className={errors.firstName ? "border-red-500" : ""}
                                             />
-                                            {errors.firstName && <p className="text-xs text-red-500">{errors.firstName}</p>}
+                                            {errors.firstName &&
+                                                <p className="text-xs text-red-500">{errors.firstName}</p>}
                                         </div>
 
                                         <div className="space-y-2">
@@ -543,7 +826,8 @@ const Profile = () => {
                                                 onChange={handleChange}
                                                 className={errors.lastName ? "border-red-500" : ""}
                                             />
-                                            {errors.lastName && <p className="text-xs text-red-500">{errors.lastName}</p>}
+                                            {errors.lastName &&
+                                                <p className="text-xs text-red-500">{errors.lastName}</p>}
                                         </div>
                                     </div>
 
@@ -612,7 +896,8 @@ const Profile = () => {
                                                 onChange={handleChange}
                                                 className={errors.birthday ? "border-red-500" : ""}
                                             />
-                                            {errors.birthday && <p className="text-xs text-red-500">{errors.birthday}</p>}
+                                            {errors.birthday &&
+                                                <p className="text-xs text-red-500">{errors.birthday}</p>}
                                         </div>
                                     </div>
 
@@ -694,7 +979,8 @@ const Profile = () => {
                                                 onChange={handleChange}
                                                 className={errors.specialty ? "border-red-500" : ""}
                                             />
-                                            {errors.specialty && <p className="text-xs text-red-500">{errors.specialty}</p>}
+                                            {errors.specialty &&
+                                                <p className="text-xs text-red-500">{errors.specialty}</p>}
                                         </div>
                                     )}
 
@@ -746,7 +1032,8 @@ const Profile = () => {
                                                         onChange={handleChange}
                                                         className={errors.goals ? "border-red-500" : ""}
                                                     />
-                                                    {errors.goals && <p className="text-xs text-red-500">{errors.goals}</p>}
+                                                    {errors.goals &&
+                                                        <p className="text-xs text-red-500">{errors.goals}</p>}
                                                 </div>
                                             </div>
 
@@ -778,11 +1065,17 @@ const Profile = () => {
                                         </div>
                                     )}
 
-                                    <CardFooter className="px-0 pb-0">
-                                        <Button type="submit" className="w-full">
-                                            Create Profile
+                                    <div className="flex justify-between mt-6">
+                                        <Button
+                                            variant="outline"
+                                            onClick={handleCancel}
+                                        >
+                                            Cancel
                                         </Button>
-                                    </CardFooter>
+                                        <Button type="submit" onClick={handleSubmit}>
+                                            {editingProfile ? "Update" : "Create"} Profile
+                                        </Button>
+                                    </div>
                                 </form>
                             )}
                         </CardContent>
