@@ -5,12 +5,7 @@ import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/c
 import {Card, CardContent, CardFooter, CardHeader, CardTitle} from "@/components/ui/card"
 import {ScrollArea} from "@/components/ui/scroll-area"
 
-interface ChatPageProps {
-    // Define any props here if needed in the future
-}
-
-// const BASE_URL = 'http://127.0.0.1:8000'; // django backend
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const sendMessage = async (message: string, model: string) => {
     try {
@@ -45,7 +40,7 @@ interface ChatMessage {
     isUser: boolean;
 }
 
-const ChatPage: React.FC<ChatPageProps> = () => {
+const ChatPage: React.FC = () => {
     const [userInput, setUserInput] = useState<string>('');
     const [selectedModel, setSelectedModel] = useState<string>('llama');
     const [history, setHistory] = useState<ChatMessage[]>([]);

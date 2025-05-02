@@ -4,7 +4,7 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {ScrollArea} from "@/components/ui/scroll-area";
 
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 // Define interfaces for our data structures
 interface Recipe {

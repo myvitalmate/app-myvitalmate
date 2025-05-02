@@ -1,10 +1,8 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React, {useEffect, useState} from 'react';
 
-const BASE_URL = 'http://localhost:8080';
+const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 const LoginPage: React.FC = () => {
-    const navigate = useNavigate();
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
     const [message, setMessage] = useState('');
@@ -26,7 +24,7 @@ const LoginPage: React.FC = () => {
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ username, password }),
+                body: JSON.stringify({username, password}),
             });
 
             const data = await response.json();
@@ -70,7 +68,7 @@ const LoginPage: React.FC = () => {
                             required
                         />
                     </div>
-                    
+
                     <div className="mb-4">
                         <label className="block mb-2">Password</label>
                         <input
@@ -81,14 +79,14 @@ const LoginPage: React.FC = () => {
                             required
                         />
                     </div>
-                    
-                    <button 
+
+                    <button
                         type="submit"
                         className="w-full p-2 bg-blue-500 text-white rounded hover:bg-blue-600"
                     >
                         Login
                     </button>
-                    
+
                     <div className="mt-4 text-center">
                         <p>
                             Don't have an account?{' '}
@@ -101,7 +99,7 @@ const LoginPage: React.FC = () => {
             ) : (
                 <div className="text-center">
                     <p className="mb-4">You are logged in!</p>
-                    <button 
+                    <button
                         onClick={handleLogout}
                         className="px-4 py-2 bg-red-500 text-white rounded hover:bg-red-600"
                     >
