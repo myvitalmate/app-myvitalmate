@@ -2,14 +2,16 @@ package com.myvitalmate.app.userProfile.dto;
 
 import java.time.LocalDate;
 
-public record DietitianProfileDTO(
-        Long id,
+public record PatientProfileUpdateDTO(
         String firstName,
         String lastName,
         ContactDTO contact,
         AdresseDTO adresse,
         String gender,
         LocalDate birthday,
-        String specialty
+        String dietOrientation,
+        String currentWeight,
+        String goals,
+        String sickness
 ) {
 }

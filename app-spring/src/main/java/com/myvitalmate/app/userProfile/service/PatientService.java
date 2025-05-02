@@ -4,6 +4,9 @@ import com.myvitalmate.app.login.entity.Role;
 import com.myvitalmate.app.login.entity.User;
 import com.myvitalmate.app.login.repository.UserRepository;
 import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
+import com.myvitalmate.app.userProfile.dto.PatientProfileUpdateDTO;
+import com.myvitalmate.app.userProfile.entity.Adresse;
+import com.myvitalmate.app.userProfile.entity.Contact;
 import com.myvitalmate.app.userProfile.entity.PatientProfile;
 import com.myvitalmate.app.userProfile.mapper.PatientMapper;
 import com.myvitalmate.app.userProfile.repository.PatientProfileRepository;
@@ -57,13 +60,6 @@ public class PatientService {
         validationService.validateSickness(dto.sickness());
         validationService.validateGoals(dto.goals());
 
-        if (repository.existingContactData(
-                dto.contact().email(),
-                dto.contact().phoneNumber()
-        )) {
-            throw new ValidationException("A profile with the same email, phone number, or address already exists.");
-        }
-
         PatientProfile patient = patientMapper.toEntity(dto);
         patient.setUser(getCurrentUser());
         repository.save(patient);
@@ -88,6 +84,57 @@ public class PatientService {
         User currentUser = getCurrentUser();
         List<PatientProfile> patients = repository.findByUser(currentUser);
         return patientMapper.toDtoList(patients);
+    }
+
+    public void deletePatientProfile(Long id) {
+        PatientProfile patient = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patient profile not found"));
+
+        User currentUser = getCurrentUser();
+        if (!patient.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You don't have permission to delete this profile");
+        }
+
+        repository.deleteById(id);
+    }
+
+    public void updatePatientProfile(Long id, PatientProfileUpdateDTO dto) {
+        PatientProfile patient = repository.findById(id)
+                .orElseThrow(() -> new RuntimeException("Patient not found"));
+
+        User currentUser = getCurrentUser();
+        if (!patient.getUser().getId().equals(currentUser.getId())) {
+            throw new RuntimeException("You don't have permission to update this profile");
+        }
+
+        validationService.validateFirstName(dto.firstName());
+        validationService.validateLastName(dto.lastName());
+        validationService.validateCity(dto.adresse().city());
+        validationService.validateStreet(dto.adresse().street());
+        validationService.validateCountry(dto.adresse().country());
+        validationService.validatePostalcode(dto.adresse().postalCode());
+        validationService.validateEmail(dto.contact().email());
+        validationService.validatePhoneNumber(dto.contact().phoneNumber());
+        validationService.validateGender(dto.gender());
+        validationService.validateBirthday(dto.birthday());
+        validationService.validateDietOrientation(dto.dietOrientation());
+        validationService.validateCurrentWeight(dto.currentWeight());
+        validationService.validateSickness(dto.sickness());
+        validationService.validateGoals(dto.goals());
+
+        // Update all fields
+        patient.setFirstName(dto.firstName());
+        patient.setLastName(dto.lastName());
+        patient.setAdresse(new Adresse(dto.adresse()));
+        patient.setContact(new Contact(dto.contact()));
+        patient.setGender(dto.gender());
+        patient.setBirthday(dto.birthday());
+        patient.setDietOrientation(dto.dietOrientation());
+        patient.setCurrentWeight(dto.currentWeight());
+        patient.setSickness(dto.sickness());
+        patient.setGoals(dto.goals());
+
+        repository.save(patient);
     }
 
 
