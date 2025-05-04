@@ -11,7 +11,7 @@ const SPOONACULAR_IMAGE_BASE_URL = "https://spoonacular.com/cdn/ingredients_100x
 interface IngredientNameDTO {
     id?: number;
     name: string;
-    image: string; // We'll keep this in the interface but won't use it
+    image: string;
 }
 
 const DietprotocolPage = () => {
@@ -36,10 +36,8 @@ const DietprotocolPage = () => {
             const data = await response.json();
 
             if (data && Array.isArray(data)) {
-                // Direct array from backend
                 setIngredients(data);
             } else if (data && Array.isArray(data.results)) {
-                // Object with results array
                 setIngredients(data.results);
             } else {
                 setIngredients([]);
@@ -88,7 +86,6 @@ const DietprotocolPage = () => {
                     {/* Ingredient Results - Title Only */}
                     <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                         {loading ? (
-                            // Show loading skeletons while fetching data
                             Array(3)
                                 .fill(0)
                                 .map((_, i) => (
@@ -99,7 +96,6 @@ const DietprotocolPage = () => {
                                     </Card>
                                 ))
                         ) : ingredients.length > 0 ? (
-                            // Map over the ingredients array to display only id and name
                             ingredients.map((ingredient) => (
                                 <Card key={ingredient.id} className="overflow-hidden hover:shadow-md transition-shadow">
                                     <CardContent className="p-4">
