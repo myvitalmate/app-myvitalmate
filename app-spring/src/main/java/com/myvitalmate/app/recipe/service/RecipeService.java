@@ -3,7 +3,6 @@ package com.myvitalmate.app.recipe.service;
 import com.myvitalmate.app.recipe.dto.RecipeIngredientsDTO;
 import com.myvitalmate.app.recipe.dto.RecipeInstructionsDTO;
 import com.myvitalmate.app.recipe.dto.RecipeResponseDTO;
-import com.myvitalmate.app.recipe.dto.RecipeResultsDTO;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -20,7 +19,6 @@ import java.util.ArrayList;
 import java.util.Collections;
 import java.util.List;
 import java.util.Map;
-import java.util.stream.Collectors;
 
 @Service
 public class RecipeService {
@@ -32,7 +30,7 @@ public class RecipeService {
     @Value("${spoonacular.api.key}")
     private String apiKey;
 
-    public List<RecipeResultsDTO> getRecipesByName(String searchRecipeByName) {
+    public List<RecipeResponseDTO.RecipeItemDTO> getRecipesByName(String searchRecipeByName) {
         if (apiKey == null || apiKey.isEmpty()) {
             throw new IllegalArgumentException("API key not found. Please set it in the customApplication.properties file.");
         }
@@ -47,23 +45,12 @@ public class RecipeService {
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<>() {
+                    new ParameterizedTypeReference<RecipeResponseDTO>() {
                     }
             );
 
-            RecipeResponseDTO recipeResponseDTO = responseEntity.getBody();
-
-            if (recipeResponseDTO == null || recipeResponseDTO.results() == null) {
-                return List.of();
-            }
-
-            return recipeResponseDTO.results().stream()
-                    .map(result -> new RecipeResultsDTO(
-                            result.id(),
-                            result.title(),
-                            result.image()
-                    ))
-                    .collect(Collectors.toList());
+            RecipeResponseDTO response = responseEntity.getBody();
+            return response != null && response.results() != null ? response.results() : List.of();
 
         } catch (RestClientException e) {
             logger.error("API request failed: {}", e.getMessage());
