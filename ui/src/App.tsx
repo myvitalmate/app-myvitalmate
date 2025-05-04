@@ -7,12 +7,14 @@ import RecipesPage from "./pages/Recipes/RecipesPage.tsx";
 import ProfilePage from "@/pages/Profiles/ProfilePage.tsx";
 import LoginPage from "./pages/Login/LoginPage.tsx";
 import RegistrationPage from "./pages/Registration/RegistrationPage.tsx";
+import DietprotocolPage from "@/pages/Dietprotocol/DietprotocolPage.tsx";
 
 // Define routes in an object format
 const routes = [
     {path: '/', element: <Home/>},
     {path: '/about', element: <About/>},
     {path: '/recipes', element: <RecipesPage/>},
+    {path: '/dietprotocol', element: <DietprotocolPage/>},
     {path: '/chat', element: <ChatPage/>},
     {path: '/profile', element: <ProfilePage/>},
     {path: '/login', element: <LoginPage/>},
