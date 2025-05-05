@@ -1,4 +1,4 @@
-package com.myvitalmate.app.dietProtocol.entity;
+package com.myvitalmate.app.nutrientLog.entity;
 
 import com.myvitalmate.app.userProfile.entity.Profile;
 import jakarta.persistence.*;
