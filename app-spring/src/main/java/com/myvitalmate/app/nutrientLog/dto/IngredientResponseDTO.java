@@ -1,4 +1,4 @@
-package com.myvitalmate.app.dietProtocol.dto;
+package com.myvitalmate.app.nutrientLog.dto;
 
 import java.util.List;
 
