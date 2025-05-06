@@ -3,7 +3,7 @@ import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
 import {Search} from 'lucide-react';
 import {Skeleton} from "@/components/ui/skeleton";
-import {useState} from "react";
+import {useEffect, useState} from "react";
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 const SPOONACULAR_IMAGE_BASE_URL = "https://spoonacular.com/cdn/ingredients_100x100/";
@@ -28,6 +28,42 @@ const NutrientLogPage = () => {
     const [selectedIngredient, setSelectedIngredient] = useState<IngredientNameDTO | null>(null);
     const [nutrients, setNutrients] = useState<NutrientValueDTO[]>([]);
     const [loadingNutrients, setLoadingNutrients] = useState(false);
+    const [patientProfileId, setPatientProfileId] = useState<number | null>(null);
+
+    useEffect(() => {
+        const fetchPatientProfileId = async () => {
+            try {
+                const token = localStorage.getItem('token');
+                if (!token) {
+                    setError("You must be logged in to use this feature");
+                    return;
+                }
+
+
+                const response = await fetch(`${BASE_URL}/patients/viewAll`, {
+                    headers: {
+                        "Authorization": `Bearer ${token}`
+                    }
+                });
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`);
+                }
+
+                const myPatients = await response.json();
+
+                if (myPatients && myPatients.length > 0) {
+                    setPatientProfileId(myPatients[0].id);
+                } else {
+                    setError("No patient profile found. Please create a profile first.");
+                }
+            } catch (err) {
+                setError(err instanceof Error ? err.message : 'Failed to fetch patient profile');
+            }
+        };
+
+        fetchPatientProfileId();
+    }, []);
 
     const searchIngredients = async () => {
         if (!ingredientName.trim()) return;
@@ -76,6 +112,7 @@ const NutrientLogPage = () => {
             const data = await response.json();
             if (Array.isArray(data)) {
                 setNutrients(data);
+                await logFoodEntry(selectedIngredient!, data);
             } else if (data && Array.isArray(data.nutrients)) {
                 setNutrients(data.nutrients);
             } else {
@@ -90,6 +127,49 @@ const NutrientLogPage = () => {
             setLoadingNutrients(false);
         }
     };
+
+    const logFoodEntry = async (ingredient: IngredientNameDTO, nutrientValues: NutrientValueDTO[]) => {
+        if (!patientProfileId) {
+            setError("Patient profile not found. Please create a profile first.");
+            return;
+        }
+
+        try {
+            // Format the date as ISO date string (YYYY-MM-DD)
+            const today = new Date().toISOString().split("T")[0];
+
+            // Create the food entry DTO
+            const foodEntryDTO = {
+                ingredientName: ingredient.name,
+                ingredientId: ingredient.id,
+                amount: 100,
+                unit: "grams",
+                timestamp: new Date().toISOString(),
+                nutrients: nutrientValues
+            };
+
+            // Build URL with query parameters
+            const url = `${BASE_URL}/nutrients/log-food?patientId=${patientProfileId}&logDate=${today}`;
+
+            const response = await fetch(url, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${localStorage.getItem('token')}`
+                },
+                body: JSON.stringify(foodEntryDTO)
+            });
+
+            if (!response.ok) {
+                throw new Error(`Failed to log food entry: ${response.status}`);
+            }
+
+            console.log("Food entry successfully logged.");
+        } catch (err) {
+            console.error("Logging error:", err);
+        }
+    };
+
 
     const handleIngredientClick = (ingredient: IngredientNameDTO) => {
         if (ingredient.id) {
