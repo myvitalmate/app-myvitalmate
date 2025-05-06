@@ -1,14 +1,15 @@
 package com.myvitalmate.app.nutrientLog.controller;
 
+import com.myvitalmate.app.nutrientLog.dto.CreateFoodEntryDTO;
 import com.myvitalmate.app.nutrientLog.dto.IngredientResponseDTO;
 import com.myvitalmate.app.nutrientLog.dto.NutrientValuesDTO;
 import com.myvitalmate.app.nutrientLog.service.NutrientTrackerService;
 import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.web.bind.annotation.GetMapping;
-import org.springframework.web.bind.annotation.RequestMapping;
-import org.springframework.web.bind.annotation.RequestParam;
-import org.springframework.web.bind.annotation.RestController;
+import org.springframework.format.annotation.DateTimeFormat;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
 
+import java.time.LocalDate;
 import java.util.List;
 
 @RestController
@@ -26,5 +27,15 @@ public class NutrientController {
     @GetMapping("/nutrientValues")
     public List<NutrientValuesDTO> getNutrientValues(@RequestParam int ingredientId, double amount, String unit) {
         return nutrientTrackerService.getNutrientValues(ingredientId, (int) amount, unit);
+    }
+
+    @PostMapping("/log-food")
+    public ResponseEntity<?> logFood(
+            @RequestBody CreateFoodEntryDTO dto,
+            @RequestParam Long patientId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate logDate
+    ) {
+        nutrientTrackerService.logFoodEntry(dto, patientId, logDate);
+        return ResponseEntity.ok("Food entry logged.");
     }
 }

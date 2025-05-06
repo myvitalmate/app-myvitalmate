@@ -1,8 +1,17 @@
 package com.myvitalmate.app.nutrientLog.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
+import com.myvitalmate.app.nutrientLog.dto.CreateFoodEntryDTO;
 import com.myvitalmate.app.nutrientLog.dto.IngredientResponseDTO;
 import com.myvitalmate.app.nutrientLog.dto.NutrientValuesDTO;
+import com.myvitalmate.app.nutrientLog.entity.FoodEntryEntity;
+import com.myvitalmate.app.nutrientLog.entity.NutrientEntryEntity;
+import com.myvitalmate.app.nutrientLog.entity.NutrientLogEntity;
+import com.myvitalmate.app.nutrientLog.mapper.NutrientValuesMapper;
+import com.myvitalmate.app.nutrientLog.repository.FoodEntryRepository;
+import com.myvitalmate.app.nutrientLog.repository.NutrientLogRepository;
+import com.myvitalmate.app.userProfile.entity.PatientProfile;
+import jakarta.transaction.Transactional;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -15,13 +24,24 @@ import org.springframework.web.client.RestClientException;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
+import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
 
 @Service
 public class NutrientTrackerService {
+
     private static final Logger logger = LoggerFactory.getLogger(NutrientTrackerService.class);
     private final String base_url = "https://api.spoonacular.com";
+    @Autowired
+    private NutrientValuesMapper nutrientValuesMapper;
+
+    @Autowired
+    private NutrientLogRepository nutrientLogRepository;
+
+    @Autowired
+    private FoodEntryRepository foodEntryRepository;
+
     @Autowired
     private RestTemplate restTemplate;
     @Value("${spoonacular.api.key}")
@@ -90,7 +110,6 @@ public class NutrientTrackerService {
                             nutrientNode.has("amount") ? nutrientNode.get("amount").asDouble() : 0.0,
                             nutrientNode.has("unit") ? nutrientNode.get("unit").asText() : ""
                     );
-
                     nutrientValues.add(nutrient);
                 }
                 return nutrientValues;
@@ -101,5 +120,46 @@ public class NutrientTrackerService {
             logger.error("An unexpected error occurred: {}", e.getMessage());
         }
         return List.of();
+    }
+
+    @Transactional
+    public void logFoodEntry(CreateFoodEntryDTO foodDto, Long patientId, LocalDate logDate) {
+        NutrientLogEntity nutrientLog = nutrientLogRepository
+                .findByPatientIdAndLogDate(patientId, logDate)
+                .orElseGet(() -> {
+                    // Create a new PatientProfile instance and set its ID
+                    PatientProfile patient = new PatientProfile();
+                    patient.setId(patientId);
+
+                    NutrientLogEntity newLog = new NutrientLogEntity();
+                    newLog.setPatient(patient);
+                    newLog.setLogDate(logDate);
+                    return nutrientLogRepository.save(newLog);
+                });
+
+        FoodEntryEntity foodEntry = new FoodEntryEntity();
+        foodEntry.setIngredientName(foodDto.ingredientName());
+        foodEntry.setIngredientId(foodDto.ingredientId());
+        foodEntry.setAmount(foodDto.amount());
+        foodEntry.setUnit(foodDto.unit());
+        foodEntry.setTimestamp(foodDto.timestamp());
+        foodEntry.setNutrientLog(nutrientLog);
+
+        List<NutrientValuesDTO> nutrientsDto = getNutrientValues(
+                foodDto.ingredientId(),
+                (int) foodDto.amount(),
+                foodDto.unit()
+        );
+
+        List<NutrientEntryEntity> nutrientEntities = nutrientsDto.stream()
+                .map(dto -> {
+                    NutrientEntryEntity entity = nutrientValuesMapper.toEntity(dto);
+                    entity.setFoodEntry(foodEntry);
+                    return entity;
+                }).toList();
+
+        foodEntry.setNutrients(nutrientEntities);
+
+        foodEntryRepository.save(foodEntry);
     }
 }
