@@ -1,8 +1,11 @@
 package com.myvitalmate.app.nutrientLog.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.myvitalmate.app.nutrientLog.dto.CreateFoodEntryDTO;
+import com.myvitalmate.app.login.repository.UserRepository;
+import com.myvitalmate.app.login.service.UserService;
+import com.myvitalmate.app.nutrientLog.dto.FoodEntryDTO;
 import com.myvitalmate.app.nutrientLog.dto.IngredientResponseDTO;
+import com.myvitalmate.app.nutrientLog.dto.NutrientLogDTO;
 import com.myvitalmate.app.nutrientLog.dto.NutrientValuesDTO;
 import com.myvitalmate.app.nutrientLog.entity.FoodEntryEntity;
 import com.myvitalmate.app.nutrientLog.entity.NutrientEntryEntity;
@@ -41,6 +44,12 @@ public class NutrientTrackerService {
 
     @Autowired
     private FoodEntryRepository foodEntryRepository;
+
+    @Autowired
+    private UserRepository userRepository;
+
+    @Autowired
+    private UserService userService;
 
     @Autowired
     private RestTemplate restTemplate;
@@ -123,11 +132,10 @@ public class NutrientTrackerService {
     }
 
     @Transactional
-    public void logFoodEntry(CreateFoodEntryDTO foodDto, Long patientId, LocalDate logDate) {
+    public void logFoodEntry(FoodEntryDTO foodDto, Long patientId, LocalDate logDate) {
         NutrientLogEntity nutrientLog = nutrientLogRepository
                 .findByPatientIdAndLogDate(patientId, logDate)
                 .orElseGet(() -> {
-                    // Create a new PatientProfile instance and set its ID
                     PatientProfile patient = new PatientProfile();
                     patient.setId(patientId);
 
@@ -161,5 +169,37 @@ public class NutrientTrackerService {
         foodEntry.setNutrients(nutrientEntities);
 
         foodEntryRepository.save(foodEntry);
+    }
+
+    public NutrientLogDTO getNutrientLog(Long patientId, LocalDate logDate) {
+        return nutrientLogRepository
+                .findByPatientIdAndLogDate(patientId, logDate)
+                .map(nutrientLog -> {
+                    List<FoodEntryDTO> foodEntryDTOs = nutrientLog.getFoodEntries().stream()
+                            .map(this::convertToFoodEntryDTO)
+                            .toList();
+
+                    return new NutrientLogDTO(
+                            nutrientLog.getLogDate(),
+                            nutrientLog.getPatient().getId(),
+                            foodEntryDTOs
+                    );
+                })
+                .orElse(new NutrientLogDTO(logDate, patientId, List.of()));
+    }
+
+    private FoodEntryDTO convertToFoodEntryDTO(FoodEntryEntity entity) {
+        List<NutrientValuesDTO> nutrientDTOs = entity.getNutrients().stream()
+                .map(nutrientValuesMapper::toDto)
+                .toList();
+
+        return new FoodEntryDTO(
+                entity.getIngredientName(),
+                entity.getIngredientId(),
+                entity.getAmount(),
+                entity.getUnit(),
+                entity.getTimestamp(),
+                nutrientDTOs
+        );
     }
 }
