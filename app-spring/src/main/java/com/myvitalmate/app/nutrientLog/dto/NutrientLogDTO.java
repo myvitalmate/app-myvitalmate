@@ -3,9 +3,9 @@ package com.myvitalmate.app.nutrientLog.dto;
 import java.time.LocalDate;
 import java.util.List;
 
-public record CreateNutrientLogDTO(
+public record NutrientLogDTO(
         LocalDate logDate,
         Long patientId,
-        List<CreateFoodEntryDTO> foodEntries
+        List<FoodEntryDTO> foodEntries
 ) {
 }

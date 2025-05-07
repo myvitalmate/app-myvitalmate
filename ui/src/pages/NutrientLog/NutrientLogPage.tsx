@@ -1,3 +1,5 @@
+// NutrientLogPage.tsx
+
 import {Card, CardContent} from "@/components/ui/card";
 import {Input} from "@/components/ui/input";
 import {Button} from "@/components/ui/button";
@@ -20,6 +22,21 @@ interface NutrientValueDTO {
     unit: string;
 }
 
+interface FoodEntryDTO {
+    ingredientName: string;
+    ingredientId?: number;
+    amount: number;
+    unit: string;
+    timestamp: string;
+    nutrients: NutrientValueDTO[];
+}
+
+interface NutrientLogDTO {
+    logDate: string;
+    patientId: number;
+    foodEntries: FoodEntryDTO[];
+}
+
 const NutrientLogPage = () => {
     const [ingredientName, setIngredientName] = useState("");
     const [ingredients, setIngredients] = useState<IngredientNameDTO[]>([]);
@@ -29,6 +46,7 @@ const NutrientLogPage = () => {
     const [nutrients, setNutrients] = useState<NutrientValueDTO[]>([]);
     const [loadingNutrients, setLoadingNutrients] = useState(false);
     const [patientProfileId, setPatientProfileId] = useState<number | null>(null);
+    const [nutrientLog, setNutrientLog] = useState<NutrientLogDTO | null>(null);
 
     useEffect(() => {
         const fetchPatientProfileId = async () => {
@@ -38,7 +56,6 @@ const NutrientLogPage = () => {
                     setError("You must be logged in to use this feature");
                     return;
                 }
-
 
                 const response = await fetch(`${BASE_URL}/patients/viewAll`, {
                     headers: {
@@ -51,13 +68,18 @@ const NutrientLogPage = () => {
                 }
 
                 const myPatients = await response.json();
+                console.log("Patients:", myPatients);
 
                 if (myPatients && myPatients.length > 0) {
-                    setPatientProfileId(myPatients[0].id);
+                    const patientId = myPatients[0].id;
+                    console.log("Selected patient ID:", patientId);
+                    setPatientProfileId(patientId);
+                    fetchNutrientLog(patientId);
                 } else {
                     setError("No patient profile found. Please create a profile first.");
                 }
             } catch (err) {
+                console.error("Error fetching patient profile:", err);
                 setError(err instanceof Error ? err.message : 'Failed to fetch patient profile');
             }
         };
@@ -73,21 +95,10 @@ const NutrientLogPage = () => {
 
         try {
             const response = await fetch(`${BASE_URL}/nutrients/ingredients?ingredientName=${ingredientName}`);
-
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Error: ${response.status}`);
 
             const data = await response.json();
-
-            if (data && Array.isArray(data)) {
-                setIngredients(data);
-            } else if (data && Array.isArray(data.results)) {
-                setIngredients(data.results);
-            } else {
-                setIngredients([]);
-                setError("No ingredients found or unexpected response format.");
-            }
+            setIngredients(Array.isArray(data) ? data : data.results || []);
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
             setIngredients([]);
@@ -105,20 +116,12 @@ const NutrientLogPage = () => {
                 `${BASE_URL}/nutrients/nutrientValues?ingredientId=${ingredientId}&amount=100&unit=grams`
             );
 
-            if (!response.ok) {
-                throw new Error(`Error: ${response.status}`);
-            }
+            if (!response.ok) throw new Error(`Error: ${response.status}`);
 
             const data = await response.json();
-            if (Array.isArray(data)) {
-                setNutrients(data);
-                await logFoodEntry(selectedIngredient!, data);
-            } else if (data && Array.isArray(data.nutrients)) {
-                setNutrients(data.nutrients);
-            } else {
-                setNutrients([]);
-                setError("No nutrient data found or unexpected response format.");
-            }
+            setNutrients(data);
+            await logFoodEntry(selectedIngredient!, data);
+            if (patientProfileId) fetchNutrientLog(patientProfileId);
 
         } catch (err) {
             setError(err instanceof Error ? err.message : 'An error occurred');
@@ -129,16 +132,10 @@ const NutrientLogPage = () => {
     };
 
     const logFoodEntry = async (ingredient: IngredientNameDTO, nutrientValues: NutrientValueDTO[]) => {
-        if (!patientProfileId) {
-            setError("Patient profile not found. Please create a profile first.");
-            return;
-        }
+        if (!patientProfileId) return setError("Patient profile not found.");
 
         try {
-            // Format the date as ISO date string (YYYY-MM-DD)
             const today = new Date().toISOString().split("T")[0];
-
-            // Create the food entry DTO
             const foodEntryDTO = {
                 ingredientName: ingredient.name,
                 ingredientId: ingredient.id,
@@ -148,9 +145,7 @@ const NutrientLogPage = () => {
                 nutrients: nutrientValues
             };
 
-            // Build URL with query parameters
             const url = `${BASE_URL}/nutrients/log-food?patientId=${patientProfileId}&logDate=${today}`;
-
             const response = await fetch(url, {
                 method: "POST",
                 headers: {
@@ -160,16 +155,39 @@ const NutrientLogPage = () => {
                 body: JSON.stringify(foodEntryDTO)
             });
 
-            if (!response.ok) {
-                throw new Error(`Failed to log food entry: ${response.status}`);
-            }
-
-            console.log("Food entry successfully logged.");
+            if (!response.ok) throw new Error(`Failed to log food entry: ${response.status}`);
         } catch (err) {
             console.error("Logging error:", err);
         }
     };
 
+    const fetchNutrientLog = async (patientId: number) => {
+        try {
+            const today = new Date().toLocaleDateString('en-CA');
+            console.log(`Fetching nutrient log for patientId=${patientId} and logDate=${today}`);
+
+            const response = await fetch(`${BASE_URL}/nutrients/log?patientId=${patientId}&logDate=${today}`, {
+                headers: {"Authorization": `Bearer ${localStorage.getItem('token')}`}
+            });
+
+            if (response.status === 404) {
+                console.log("No nutrient log found for today");
+                setNutrientLog(null);
+                return;
+            }
+
+            if (!response.ok) {
+                throw new Error(`Error: ${response.status}`);
+            }
+
+            const data = await response.json();
+            console.log("Nutrient log data:", data);
+            setNutrientLog(data);
+        } catch (err) {
+            console.error("Error fetching nutrient log:", err);
+            setError(err instanceof Error ? err.message : 'Failed to fetch nutrient log');
+        }
+    };
 
     const handleIngredientClick = (ingredient: IngredientNameDTO) => {
         if (ingredient.id) {
@@ -179,120 +197,82 @@ const NutrientLogPage = () => {
     };
 
     return (
-        <main className="min-h-screen bg-gradient-to-b from-green-50 to-white">
-            <div className="container mx-auto px-4 py-12">
-                <div className="max-w-3xl mx-auto">
-                    <h1 className="text-4xl font-bold text-center text-green-800 mb-2">NutrientLog</h1>
-                    <p className="text-center text-gray-600 mb-8">Your personal nutrition tracking assistant</p>
+        <main className="min-h-screen bg-white p-8">
+            <div className="max-w-4xl mx-auto">
+                <h1 className="text-3xl font-bold mb-6 text-center">Nutrient Log</h1>
 
-                    <div className="flex gap-2 mb-8">
-                        <div className="relative flex-1">
-                            <Input
-                                type="text"
-                                placeholder="Search ingredients..."
-                                value={ingredientName}
-                                onChange={(e) => setIngredientName(e.target.value)}
-                                onKeyDown={(e) => e.key === "Enter" && searchIngredients()}
-                                className="pl-10 border-green-200 focus-visible:ring-green-500"
-                            />
-                            <Search
-                                className="absolute left-3 top-1/2 transform -translate-y-1/2 h-4 w-4 text-gray-400"/>
-                        </div>
-                        <Button onClick={searchIngredients} className="bg-green-600 hover:bg-green-700">
-                            Search
-                        </Button>
+                <div className="flex gap-4 mb-6">
+                    <Input
+                        placeholder="Search for ingredients..."
+                        value={ingredientName}
+                        onChange={(e) => setIngredientName(e.target.value)}
+                        onKeyDown={(e) => e.key === "Enter" && searchIngredients()}
+                    />
+                    <Button onClick={searchIngredients}>
+                        <Search className="mr-2 h-4 w-4"/> Search
+                    </Button>
+                </div>
+
+                {error && <div className="text-red-500 mb-4">{error}</div>}
+
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <h2 className="text-xl font-semibold mb-2">Ingredients</h2>
+                        {loading ? (
+                            <Skeleton className="h-24 w-full"/>
+                        ) : (
+                            ingredients.map((ingredient) => (
+                                <Card key={ingredient.id} onClick={() => handleIngredientClick(ingredient)}
+                                      className="cursor-pointer mb-2">
+                                    <CardContent className="flex items-center gap-4 p-4">
+                                        <img
+                                            src={`${SPOONACULAR_IMAGE_BASE_URL}${ingredient.image}`}
+                                            alt={ingredient.name}
+                                            className="w-16 h-16 object-cover rounded"
+                                        />
+                                        <span className="text-lg">{ingredient.name}</span>
+                                    </CardContent>
+                                </Card>
+                            ))
+                        )}
                     </div>
 
-                    {/* Error Message */}
-                    {error && (
-                        <div className="p-4 mb-6 bg-red-50 text-red-700 rounded-md border border-red-200">
-                            {error}
-                        </div>
-                    )}
-
-                    {/* Grid layout for results and nutrient details */}
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-                        {/* Ingredient Results */}
-                        <div>
-                            <h2 className="text-xl font-semibold mb-4 text-green-800">Ingredients</h2>
-                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                                {loading ? (
-                                    Array(3)
-                                        .fill(0)
-                                        .map((_, i) => (
-                                            <Card key={i} className="overflow-hidden">
-                                                <CardContent className="p-4">
-                                                    <Skeleton className="h-6 w-3/4"/>
-                                                </CardContent>
-                                            </Card>
-                                        ))
-                                ) : ingredients.length > 0 ? (
-                                    ingredients.map((ingredient) => (
-                                        <Card
-                                            key={ingredient.id}
-                                            className="overflow-hidden hover:shadow-md transition-shadow cursor-pointer"
-                                            onClick={() => handleIngredientClick(ingredient)}
-                                        >
-                                            <CardContent className="p-4">
-                                                {ingredient.image && (
-                                                    <img
-                                                        src={`${SPOONACULAR_IMAGE_BASE_URL}${ingredient.image}`}
-                                                        alt={ingredient.name}
-                                                        className="w-full h-32 object-cover rounded-md mb-2"
-                                                    />
-                                                )}
-                                                <h3 className="text-lg font-medium text-green-800">
-                                                    {ingredient.name}
-                                                </h3>
-                                            </CardContent>
-                                        </Card>
-                                    ))
-                                ) : ingredientName && !loading && !error ? (
-                                    <div className="col-span-full text-center p-8 bg-gray-50 rounded-lg">
-                                        <p className="text-gray-500">No ingredients found for "{ingredientName}"</p>
-                                    </div>
-                                ) : null}
-                            </div>
-                        </div>
-
-                        {/* Nutrient Details */}
-                        <div>
-                            <h2 className="text-xl font-semibold mb-4 text-green-800">Nutrient Values</h2>
-                            <Card>
-                                <CardContent className="p-4">
-                                    {loadingNutrients ? (
-                                        <div className="space-y-2">
-                                            {Array(5).fill(0).map((_, i) => (
-                                                <Skeleton key={i} className="h-6 w-full"/>
-                                            ))}
-                                        </div>
-                                    ) : selectedIngredient ? (
-                                        <>
-                                            <h3 className="text-lg font-medium text-green-800 mb-4">
-                                                {selectedIngredient.name} (per 100g)
-                                            </h3>
-                                            {nutrients.length > 0 ? (
-                                                <div className="space-y-2">
-                                                    {nutrients.map((nutrient, index) => (
-                                                        <div key={index} className="flex justify-between py-1 border-b">
-                                                            <span className="font-medium">{nutrient.name}</span>
-                                                            <span>{nutrient.amount} {nutrient.unit}</span>
-                                                        </div>
-                                                    ))}
-                                                </div>
-                                            ) : (
-                                                <p className="text-gray-500">No nutrient data available</p>
-                                            )}
-                                        </>
-                                    ) : (
-                                        <p className="text-gray-500 text-center py-8">
-                                            Select an ingredient to view its nutrient values
-                                        </p>
-                                    )}
-                                </CardContent>
-                            </Card>
-                        </div>
+                    <div>
+                        <h2 className="text-xl font-semibold mb-2">Nutrient Values</h2>
+                        {loadingNutrients ? (
+                            <Skeleton className="h-24 w-full"/>
+                        ) : nutrients.length > 0 ? (
+                            <ul className="space-y-2">
+                                {nutrients.map((n, i) => (
+                                    <li key={i} className="flex justify-between">
+                                        <span>{n.name}</span>
+                                        <span>{n.amount} {n.unit}</span>
+                                    </li>
+                                ))}
+                            </ul>
+                        ) : (
+                            <p className="text-gray-500">Select an ingredient to view nutrient info.</p>
+                        )}
                     </div>
+                </div>
+
+                <div className="mt-10">
+                    <h2 className="text-xl font-semibold mb-4">Today's Nutrient Log</h2>
+                    {nutrientLog ? (
+                        <div className="space-y-4">
+                            {nutrientLog.foodEntries.map((entry, idx) => (
+                                <Card key={idx} className="p-4">
+                                    <h3 className="font-medium text-lg">{entry.ingredientName}</h3>
+                                    <p className="text-sm text-gray-600">Amount: {entry.amount} {entry.unit}</p>
+                                    <ul className="mt-2">
+                                        {entry.nutrients.map((n, i) => (
+                                            <li key={i}>{n.name}: {n.amount} {n.unit}</li>
+                                        ))}
+                                    </ul>
+                                </Card>
+                            ))}
+                        </div>
+                    ) : <p>No log found for today.</p>}
                 </div>
             </div>
         </main>

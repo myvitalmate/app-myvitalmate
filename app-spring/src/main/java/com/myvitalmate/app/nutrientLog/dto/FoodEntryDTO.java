@@ -3,7 +3,7 @@ package com.myvitalmate.app.nutrientLog.dto;
 import java.time.LocalDateTime;
 import java.util.List;
 
-public record CreateFoodEntryDTO(
+public record FoodEntryDTO(
         String ingredientName,
         int ingredientId,
         double amount,
