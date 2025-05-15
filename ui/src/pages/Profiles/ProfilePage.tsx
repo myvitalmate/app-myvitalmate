@@ -8,7 +8,7 @@ import {Input} from "@/components/ui/input"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 import {ScrollArea} from "@/components/ui/scroll-area"
 
-const BASE_URL = "http://localhost:8080"
+const BASE_URL = import.meta.env.VITE_BACKEND_URL
 
 type UserType = "dietitian" | "patient"
 
@@ -55,15 +55,15 @@ type FormData = {
 
 // Enhanced helper function to extract name from email with number filtering
 const extractNameFromEmail = (email: string): { firstName: string, lastName: string } => {
-    const defaultResult = { firstName: "", lastName: "" };
-    
+    const defaultResult = {firstName: "", lastName: ""};
+
     if (!email || !email.includes('@')) {
         return defaultResult;
     }
-    
+
     // Get the part before @
     const beforeAt = email.split('@')[0];
-    
+
     // Helper function to clean names (remove numbers and capitalize)
     const cleanName = (name: string): string => {
         // Remove all digits
@@ -71,41 +71,41 @@ const extractNameFromEmail = (email: string): { firstName: string, lastName: str
         // Capitalize first letter
         return withoutNumbers.charAt(0).toUpperCase() + withoutNumbers.slice(1);
     };
-    
+
     // Case 1: firstname.lastname format
     if (beforeAt.includes('.')) {
         const nameParts = beforeAt.split('.');
         if (nameParts.length >= 2) {
             const firstName = cleanName(nameParts[0]);
             const lastName = cleanName(nameParts[1]);
-            return { firstName, lastName };
+            return {firstName, lastName};
         }
     }
-    
+
     // Case 2: firstname_lastname format
     if (beforeAt.includes('_')) {
         const nameParts = beforeAt.split('_');
         if (nameParts.length >= 2) {
             const firstName = cleanName(nameParts[0]);
             const lastName = cleanName(nameParts[1]);
-            return { firstName, lastName };
+            return {firstName, lastName};
         }
     }
-    
+
     // Case 3: firstnamelastname format (camelCase)
     const camelCaseMatch = beforeAt.match(/([a-z]+)([A-Z][a-z]+)/);
     if (camelCaseMatch && camelCaseMatch.length >= 3) {
         const firstName = cleanName(camelCaseMatch[1]);
         const lastName = cleanName(camelCaseMatch[2]);
-        return { firstName, lastName };
+        return {firstName, lastName};
     }
-    
+
     // Case 4: Just use the email username as the first name
     if (beforeAt) {
         const firstName = cleanName(beforeAt);
-        return { firstName, lastName: "" };
+        return {firstName, lastName: ""};
     }
-    
+
     return defaultResult;
 };
 
@@ -180,13 +180,13 @@ const Profile = () => {
         fetchProfiles();
         setActiveView("view");
         setEditingProfile(null);
-        
+
         // Get email from token and extract name
         const token = localStorage.getItem('token');
         let email = "";
         let firstName = "";
         let lastName = "";
-        
+
         if (token) {
             try {
                 const payload = token.split('.')[1];
@@ -199,7 +199,7 @@ const Profile = () => {
                 console.error("Error parsing token:", error);
             }
         }
-        
+
         setFormData({
             firstName: firstName,
             lastName: lastName,
@@ -228,10 +228,10 @@ const Profile = () => {
                     const payload = token.split('.')[1];
                     const decodedPayload = JSON.parse(atob(payload));
                     setUserRole(decodedPayload.role);
-                    
+
                     const email = decodedPayload.sub || "";
-                    const { firstName, lastName } = extractNameFromEmail(email);
-                    
+                    const {firstName, lastName} = extractNameFromEmail(email);
+
                     setFormData(prev => ({
                         ...prev,
                         email: email,
@@ -355,13 +355,13 @@ const Profile = () => {
     const handleCancel = () => {
         setActiveView("view");
         setEditingProfile(null);
-        
+
         // Get email from token and extract name
         const token = localStorage.getItem('token');
         let email = "";
         let firstName = "";
         let lastName = "";
-        
+
         if (token) {
             try {
                 const payload = token.split('.')[1];
@@ -374,7 +374,7 @@ const Profile = () => {
                 console.error("Error parsing token:", error);
             }
         }
-        
+
         setFormData({
             firstName: firstName,
             lastName: lastName,
@@ -522,13 +522,13 @@ const Profile = () => {
                 );
                 setMessageType("success");
                 setEditingProfile(null);
-                
+
                 // Get email from token and extract name
                 const token = localStorage.getItem('token');
                 let email = "";
                 let firstName = "";
                 let lastName = "";
-                
+
                 if (token) {
                     try {
                         const payload = token.split('.')[1];

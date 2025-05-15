@@ -1,17 +1,13 @@
 package com.myvitalmate.app.nutrientLog.service;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import com.myvitalmate.app.login.repository.UserRepository;
-import com.myvitalmate.app.login.service.UserService;
-import com.myvitalmate.app.nutrientLog.dto.FoodEntryDTO;
-import com.myvitalmate.app.nutrientLog.dto.IngredientResponseDTO;
-import com.myvitalmate.app.nutrientLog.dto.NutrientLogDTO;
-import com.myvitalmate.app.nutrientLog.dto.NutrientValuesDTO;
+import com.myvitalmate.app.nutrientLog.dto.*;
 import com.myvitalmate.app.nutrientLog.entity.FoodEntryEntity;
 import com.myvitalmate.app.nutrientLog.entity.NutrientEntryEntity;
 import com.myvitalmate.app.nutrientLog.entity.NutrientLogEntity;
 import com.myvitalmate.app.nutrientLog.mapper.NutrientValuesMapper;
 import com.myvitalmate.app.nutrientLog.repository.FoodEntryRepository;
+import com.myvitalmate.app.nutrientLog.repository.NutrientEntryRepository;
 import com.myvitalmate.app.nutrientLog.repository.NutrientLogRepository;
 import com.myvitalmate.app.userProfile.entity.PatientProfile;
 import jakarta.transaction.Transactional;
@@ -20,6 +16,7 @@ import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.HttpMethod;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
@@ -29,28 +26,31 @@ import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 
 @Service
 public class NutrientTrackerService {
 
     private static final Logger logger = LoggerFactory.getLogger(NutrientTrackerService.class);
+    private static final List<String> MACRONUTRIENTS = List.of(
+            "Calories", "Protein", "Fat", "Carbohydrates", "Fiber", "Sugar"
+    );
+    private static final List<String> MICRONUTRIENTS = List.of(
+            "Vitamin A", "Vitamin C", "Vitamin D", "Vitamin E", "Vitamin K",
+            "Calcium", "Iron", "Magnesium", "Potassium", "Sodium", "Zinc"
+    );
+
     private final String base_url = "https://api.spoonacular.com";
     @Autowired
     private NutrientValuesMapper nutrientValuesMapper;
-
     @Autowired
     private NutrientLogRepository nutrientLogRepository;
-
+    @Autowired
+    private NutrientEntryRepository nutrientEntryRepository;
     @Autowired
     private FoodEntryRepository foodEntryRepository;
-
-    @Autowired
-    private UserRepository userRepository;
-
-    @Autowired
-    private UserService userService;
-
     @Autowired
     private RestTemplate restTemplate;
     @Value("${spoonacular.api.key}")
@@ -201,5 +201,46 @@ public class NutrientTrackerService {
                 entity.getTimestamp(),
                 nutrientDTOs
         );
+    }
+
+    public NutrientTotalDTO getMacronutrientTotals(Long patientId, LocalDate startDate, LocalDate endDate) {
+        return getNutrientTotals(MACRONUTRIENTS, patientId, startDate, endDate);
+    }
+
+    public NutrientTotalDTO getMicronutrientTotals(Long patientId, LocalDate startDate, LocalDate endDate) {
+        return getNutrientTotals(MICRONUTRIENTS, patientId, startDate, endDate);
+    }
+
+    private NutrientTotalDTO getNutrientTotals(List<String> nutrientNames, Long patientId,
+                                               LocalDate startDate, LocalDate endDate) {
+        List<Object[]> results = nutrientEntryRepository.sumMultipleNutrientsByDateRange(
+                nutrientNames, patientId, startDate, endDate);
+
+        Map<String, NutrientTotalDTO.NutrientValueDTO> nutrientMap = new HashMap<>();
+
+        for (Object[] result : results) {
+            String name = (String) result[0];
+            Double amount = (Double) result[1];
+            String unit = (String) result[2];
+
+            nutrientMap.put(name, new NutrientTotalDTO.NutrientValueDTO(amount, unit));
+        }
+
+        for (String nutrient : nutrientNames) {
+            if (!nutrientMap.containsKey(nutrient)) {
+                nutrientMap.put(nutrient, new NutrientTotalDTO.NutrientValueDTO(0.0, ""));
+            }
+        }
+
+        return new NutrientTotalDTO(nutrientMap);
+    }
+
+    public List<FoodEntryDTO> getLatestFoodEntries(Long patientId, int limit) {
+        List<FoodEntryEntity> latestEntries = foodEntryRepository
+                .findByNutrientLog_Patient_IdOrderByTimestampDesc(patientId, PageRequest.of(0, limit));
+
+        return latestEntries.stream()
+                .map(this::convertToFoodEntryDTO)
+                .toList();
     }
 }
