@@ -1,6 +1,6 @@
 "use client"
 
-import {Card, CardContent} from "@/components/ui/card"
+import {Card, CardContent, CardHeader, CardTitle} from "@/components/ui/card"
 import {Input} from "@/components/ui/input"
 import {Button} from "@/components/ui/button"
 import {Check, Plus, Search} from "lucide-react"
@@ -17,6 +17,8 @@ import {
     DialogTitle,
 } from "@/components/ui/dialog"
 import {Label} from "@/components/ui/label"
+import {format, subDays} from "date-fns"
+import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL
 const SPOONACULAR_IMAGE_BASE_URL = "https://spoonacular.com/cdn/ingredients_100x100/"
@@ -31,6 +33,10 @@ interface NutrientValueDTO {
     name: string
     amount: number
     unit: string
+}
+
+interface NutrientTotalDTO {
+    nutrients: Record<string, NutrientValueDTO>
 }
 
 interface FoodEntryDTO {
@@ -48,6 +54,8 @@ interface NutrientLogDTO {
     foodEntries: FoodEntryDTO[]
 }
 
+const MACRO_NUTRIENTS = ["Calories", "Protein", "Fat", "Carbohydrates", "Fiber", "Sugar"];
+
 const NutrientLogPage = () => {
     const [ingredientName, setIngredientName] = useState("")
     const [ingredients, setIngredients] = useState<IngredientNameDTO[]>([])
@@ -63,6 +71,15 @@ const NutrientLogPage = () => {
     const [unit, setUnit] = useState("grams")
     const [showAddDialog, setShowAddDialog] = useState(false)
     const [addingToLog, setAddingToLog] = useState(false)
+    const [macronutrients, setMacronutrients] = useState<NutrientTotalDTO | null>(null)
+    const [micronutrients, setMicronutrients] = useState<NutrientTotalDTO | null>(null)
+    const [dateRange, setDateRange] = useState({
+        startDate: format(subDays(new Date(), 7), 'yyyy-MM-dd'),
+        endDate: format(new Date(), 'yyyy-MM-dd')
+    })
+    const [loadingNutrientTotals, setLoadingNutrientTotals] = useState(false)
+    const [latestEntries, setLatestEntries] = useState<FoodEntryDTO[]>([]);
+    const [loadingLatestEntries, setLoadingLatestEntries] = useState(false);
 
     useEffect(() => {
         const fetchPatientProfileId = async () => {
@@ -174,7 +191,7 @@ const NutrientLogPage = () => {
             })
 
             if (!response.ok) throw new Error(`Failed to log food entry: ${response.status}`)
-            
+
             if (patientProfileId) fetchNutrientLog(patientProfileId)
 
             setShowAddDialog(false)
@@ -223,15 +240,90 @@ const NutrientLogPage = () => {
         }
     }
 
+    const fetchNutrientTotals = async () => {
+        if (!patientProfileId) return;
+
+        setLoadingNutrientTotals(true);
+        try {
+            const macroResponse = await fetch(
+                `${BASE_URL}/nutrients/macronutrients/total?patientId=${patientProfileId}&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`,
+                {
+                    headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}
+                }
+            );
+
+            const microResponse = await fetch(
+                `${BASE_URL}/nutrients/micronutrients/total?patientId=${patientProfileId}&startDate=${dateRange.startDate}&endDate=${dateRange.endDate}`,
+                {
+                    headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}
+                }
+            );
+
+            if (macroResponse.ok) {
+                const macroData = await macroResponse.json();
+                setMacronutrients(macroData);
+            }
+
+            if (microResponse.ok) {
+                const microData = await microResponse.json();
+                setMicronutrients(microData);
+            }
+        } catch (err) {
+            console.error("Error fetching nutrient totals:", err);
+            setError(err instanceof Error ? err.message : "Failed to fetch nutrient totals");
+        } finally {
+            setLoadingNutrientTotals(false);
+        }
+    };
+
+    const fetchLatestEntries = async () => {
+        if (!patientProfileId) return;
+        
+        setLoadingLatestEntries(true);
+        try {
+            const response = await fetch(
+                `${BASE_URL}/nutrients/latest-entries?patientId=${patientProfileId}&limit=10`,
+                {
+                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+                }
+            );
+            
+            if (response.ok) {
+                const data = await response.json();
+                setLatestEntries(data);
+            }
+        } catch (err) {
+            console.error("Error fetching latest entries:", err);
+        } finally {
+            setLoadingLatestEntries(false);
+        }
+    };
+
+    useEffect(() => {
+        if (patientProfileId) {
+            fetchNutrientLog(patientProfileId);
+            fetchNutrientTotals();
+            fetchLatestEntries();
+        }
+    }, [patientProfileId]);
+
+    const handleDateRangeChange = (type: 'startDate' | 'endDate', value: string) => {
+        setDateRange(prev => ({
+            ...prev,
+            [type]: value
+        }));
+    };
+
     return (
         <main className="min-h-screen bg-white p-8">
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-3xl font-bold mb-6 text-center">Nutrient Log</h1>
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
-                    <TabsList className="grid w-full grid-cols-2 mb-6">
+                    <TabsList className="grid w-full grid-cols-3 mb-6">
                         <TabsTrigger value="add-food">Add Food</TabsTrigger>
                         <TabsTrigger value="nutrient-log">Nutrient Log</TabsTrigger>
+                        <TabsTrigger value="nutrient-totals">Nutrient Totals</TabsTrigger>
                     </TabsList>
 
                     <TabsContent value="add-food">
@@ -331,40 +423,174 @@ const NutrientLogPage = () => {
                     </TabsContent>
 
                     <TabsContent value="nutrient-log">
+                        <div className="space-y-6">
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4">Today's Nutrient Log</h2>
+                                {nutrientLog && nutrientLog.foodEntries.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {nutrientLog.foodEntries.map((entry, idx) => (
+                                            <Card key={idx} className="overflow-hidden">
+                                                <CardContent className="p-4">
+                                                    <div className="flex justify-between items-center mb-2">
+                                                        <h3 className="font-medium text-lg">{entry.ingredientName}</h3>
+                                                        <Badge variant="outline">
+                                                            {entry.amount} {entry.unit}
+                                                        </Badge>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2 mt-3">
+                                                        {entry.nutrients
+                                                            .filter(n => MACRO_NUTRIENTS.includes(n.name))
+                                                            .map((n, i) => (
+                                                                <div key={i} className="flex justify-between text-sm">
+                                                                    <span className="text-gray-600">{n.name}:</span>
+                                                                    <span>
+                                                                        {n.amount} {n.unit}
+                                                                    </span>
+                                                                </div>
+                                                            ))}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-500 mb-4">No food entries found for today.</p>
+                                        <Button variant="outline" onClick={() => setActiveTab("add-food")}>
+                                            <Plus className="mr-2 h-4 w-4"/>
+                                            Add Food Items
+                                        </Button>
+                                    </div>
+                                )}
+                            </div>
+
+                            <div>
+                                <h2 className="text-xl font-semibold mb-4">Recent Food Entries</h2>
+                                {loadingLatestEntries ? (
+                                    <div className="space-y-2">
+                                        <Skeleton className="h-24 w-full"/>
+                                        <Skeleton className="h-24 w-full"/>
+                                    </div>
+                                ) : latestEntries.length > 0 ? (
+                                    <div className="space-y-4">
+                                        {latestEntries.map((entry, idx) => (
+                                            <Card key={idx} className="overflow-hidden">
+                                                <CardContent className="p-4">
+                                                    <div className="flex justify-between items-center mb-2">
+                                                        <h3 className="font-medium text-lg">{entry.ingredientName}</h3>
+                                                        <div className="flex flex-col items-end">
+                                                            <Badge variant="outline" className="mb-1">
+                                                                {entry.amount} {entry.unit}
+                                                            </Badge>
+                                                            <span className="text-xs text-gray-500">
+                                                                {new Date(entry.timestamp).toLocaleDateString()}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+                                                    <div className="grid grid-cols-2 gap-2 mt-3">
+                                                        {entry.nutrients
+                                                            .filter(n => MACRO_NUTRIENTS.includes(n.name))
+                                                            .map((n, i) => (
+                                                                <div key={i} className="flex justify-between text-sm">
+                                                                    <span className="text-gray-600">{n.name}:</span>
+                                                                    <span>
+                                                                        {n.amount} {n.unit}
+                                                                    </span>
+                                                                </div>
+                                                            ))}
+                                                    </div>
+                                                </CardContent>
+                                            </Card>
+                                        ))}
+                                    </div>
+                                ) : (
+                                    <div className="text-center py-8">
+                                        <p className="text-gray-500">No recent food entries found.</p>
+                                    </div>
+                                )}
+                            </div>
+                        </div>
+                    </TabsContent>
+
+                    <TabsContent value="nutrient-totals">
                         <div>
-                            <h2 className="text-xl font-semibold mb-4">Today's Nutrient Log</h2>
-                            {nutrientLog && nutrientLog.foodEntries.length > 0 ? (
-                                <div className="space-y-4">
-                                    {nutrientLog.foodEntries.map((entry, idx) => (
-                                        <Card key={idx} className="overflow-hidden">
-                                            <CardContent className="p-4">
-                                                <div className="flex justify-between items-center mb-2">
-                                                    <h3 className="font-medium text-lg">{entry.ingredientName}</h3>
-                                                    <Badge variant="outline">
-                                                        {entry.amount} {entry.unit}
-                                                    </Badge>
-                                                </div>
-                                                <div className="grid grid-cols-2 gap-2 mt-3">
-                                                    {entry.nutrients.slice(0, 6).map((n, i) => (
-                                                        <div key={i} className="flex justify-between text-sm">
-                                                            <span className="text-gray-600">{n.name}:</span>
-                                                            <span>
-                                {n.amount} {n.unit}
-                              </span>
+                            <h2 className="text-xl font-semibold mb-4">Nutrient Totals</h2>
+
+                            <div className="grid grid-cols-2 gap-4 mb-6">
+                                <div className="flex flex-col">
+                                    <label htmlFor="startDate" className="text-sm font-medium mb-1">Start Date</label>
+                                    <Input
+                                        id="startDate"
+                                        type="date"
+                                        value={dateRange.startDate}
+                                        onChange={(e) => handleDateRangeChange('startDate', e.target.value)}
+                                    />
+                                </div>
+                                <div className="flex flex-col">
+                                    <label htmlFor="endDate" className="text-sm font-medium mb-1">End Date</label>
+                                    <Input
+                                        id="endDate"
+                                        type="date"
+                                        value={dateRange.endDate}
+                                        onChange={(e) => handleDateRangeChange('endDate', e.target.value)}
+                                    />
+                                </div>
+                            </div>
+
+                            {loadingNutrientTotals ? (
+                                <div className="space-y-2">
+                                    <Skeleton className="h-24 w-full"/>
+                                    <Skeleton className="h-24 w-full"/>
+                                </div>
+                            ) : (
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Macronutrients</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            {macronutrients && Object.entries(macronutrients.nutrients).length > 0 ? (
+                                                <div className="space-y-2">
+                                                    {Object.entries(macronutrients.nutrients).map(([name, value]) => (
+                                                        <div key={name}
+                                                             className="flex justify-between items-center py-2 border-b">
+                                                            <span className="font-medium">{name}</span>
+                                                            <Badge variant="outline">
+                                                                {value.amount.toFixed(1)} {value.unit}
+                                                            </Badge>
                                                         </div>
                                                     ))}
                                                 </div>
-                                            </CardContent>
-                                        </Card>
-                                    ))}
-                                </div>
-                            ) : (
-                                <div className="text-center py-8">
-                                    <p className="text-gray-500 mb-4">No food entries found for today.</p>
-                                    <Button variant="outline" onClick={() => setActiveTab("add-food")}>
-                                        <Plus className="mr-2 h-4 w-4"/>
-                                        Add Food Items
-                                    </Button>
+                                            ) : (
+                                                <p className="text-gray-500 text-center py-4">No macronutrient data
+                                                    available for the selected period.</p>
+                                            )}
+                                        </CardContent>
+                                    </Card>
+
+                                    <Card>
+                                        <CardHeader>
+                                            <CardTitle>Micronutrients</CardTitle>
+                                        </CardHeader>
+                                        <CardContent>
+                                            {micronutrients && Object.entries(micronutrients.nutrients).length > 0 ? (
+                                                <div className="space-y-2">
+                                                    {Object.entries(micronutrients.nutrients).map(([name, value]) => (
+                                                        <div key={name}
+                                                             className="flex justify-between items-center py-2 border-b">
+                                                            <span className="font-medium">{name}</span>
+                                                            <Badge variant="outline">
+                                                                {value.amount.toFixed(1)} {value.unit}
+                                                            </Badge>
+                                                        </div>
+                                                    ))}
+                                                </div>
+                                            ) : (
+                                                <p className="text-gray-500 text-center py-4">No micronutrient data
+                                                    available for the selected period.</p>
+                                            )}
+                                        </CardContent>
+                                    </Card>
                                 </div>
                             )}
                         </div>
@@ -397,8 +623,17 @@ const NutrientLogPage = () => {
                             <Label htmlFor="unit" className="text-right">
                                 Unit
                             </Label>
-                            <Input id="unit" value={unit} onChange={(e) => setUnit(e.target.value)}
-                                   className="col-span-3"/>
+                            <div className="col-span-3">
+                                <Select value={unit} onValueChange={setUnit}>
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select unit"/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        <SelectItem value="grams">Grams</SelectItem>
+                                        <SelectItem value="milliliters">Milliliters</SelectItem>
+                                    </SelectContent>
+                                </Select>
+                            </div>
                         </div>
                     </div>
 

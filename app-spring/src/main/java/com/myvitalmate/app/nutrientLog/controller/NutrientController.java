@@ -1,10 +1,6 @@
 package com.myvitalmate.app.nutrientLog.controller;
 
-import com.myvitalmate.app.nutrientLog.dto.FoodEntryDTO;
-import com.myvitalmate.app.nutrientLog.dto.IngredientResponseDTO;
-import com.myvitalmate.app.nutrientLog.dto.NutrientLogDTO;
-import com.myvitalmate.app.nutrientLog.dto.NutrientValuesDTO;
-import com.myvitalmate.app.nutrientLog.repository.FoodEntryRepository;
+import com.myvitalmate.app.nutrientLog.dto.*;
 import com.myvitalmate.app.nutrientLog.service.NutrientTrackerService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.format.annotation.DateTimeFormat;
@@ -17,9 +13,6 @@ import java.util.List;
 @RestController
 @RequestMapping(value = "nutrients")
 public class NutrientController {
-
-    @Autowired
-    private FoodEntryRepository foodEntryRepository;
 
     @Autowired
     private NutrientTrackerService nutrientTrackerService;
@@ -53,4 +46,34 @@ public class NutrientController {
         return ResponseEntity.ok(nutrientLog);
     }
 
+    @GetMapping("/macronutrients/total")
+    public ResponseEntity<NutrientTotalDTO> getMacronutrientTotals(
+            @RequestParam Long patientId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        NutrientTotalDTO totals = nutrientTrackerService.getMacronutrientTotals(
+                patientId, startDate, endDate);
+        return ResponseEntity.ok(totals);
+    }
+
+    @GetMapping("/micronutrients/total")
+    public ResponseEntity<NutrientTotalDTO> getMicronutrientTotals(
+            @RequestParam Long patientId,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate startDate,
+            @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate endDate
+    ) {
+        NutrientTotalDTO totals = nutrientTrackerService.getMicronutrientTotals(
+                patientId, startDate, endDate);
+        return ResponseEntity.ok(totals);
+    }
+
+    @GetMapping("/latest-entries")
+    public ResponseEntity<List<FoodEntryDTO>> getLatestFoodEntries(
+            @RequestParam Long patientId,
+            @RequestParam int limit
+    ) {
+        List<FoodEntryDTO> latestEntries = nutrientTrackerService.getLatestFoodEntries(patientId, limit);
+        return ResponseEntity.ok(latestEntries);
+    }
 }
