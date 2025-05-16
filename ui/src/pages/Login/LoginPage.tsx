@@ -1,7 +1,7 @@
 import React, {useEffect, useState} from 'react';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
-const LOGOUT_DELAY_MS = 23 * 60 * 60 * 1000; // 23 hours in milliseconds
+const LOGOUT_DELAY_MS = 20 * 60 * 60 * 1000; // 20 hours in milliseconds
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -10,6 +10,16 @@ const LoginPage: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
+        checkTokenValidity();
+
+        window.addEventListener('beforeunload', handleLogout);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleLogout);
+        };
+    }, []);
+
+    const checkTokenValidity = async () => {
         const token = localStorage.getItem('token');
         const loginTime = localStorage.getItem('loginTime');
 
@@ -17,15 +27,12 @@ const LoginPage: React.FC = () => {
             const loginTimestamp = parseInt(loginTime, 10);
             const now = Date.now();
 
-            if (now - loginTimestamp < LOGOUT_DELAY_MS) {
-                setIsLoggedIn(true);
-                const timeLeft = LOGOUT_DELAY_MS - (now - loginTimestamp);
-                setAutoLogout(timeLeft);
-            } else {
+            if (now - loginTimestamp >= LOGOUT_DELAY_MS) {
                 handleLogout();
+                return;
             }
         }
-    }, []);
+    };
 
     const setAutoLogout = (timeout: number) => {
         setTimeout(() => {
