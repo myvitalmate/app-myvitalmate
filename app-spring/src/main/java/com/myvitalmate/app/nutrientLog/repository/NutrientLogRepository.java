@@ -8,4 +8,6 @@ import java.util.Optional;
 
 public interface NutrientLogRepository extends JpaRepository<NutrientLogEntity, Long> {
     Optional<NutrientLogEntity> findByPatientIdAndLogDate(Long patientId, LocalDate logDate);
+
+    void deleteByPatientId(Long patientId);
 }
