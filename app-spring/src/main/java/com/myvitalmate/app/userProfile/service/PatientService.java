@@ -3,6 +3,7 @@ package com.myvitalmate.app.userProfile.service;
 import com.myvitalmate.app.login.entity.Role;
 import com.myvitalmate.app.login.entity.User;
 import com.myvitalmate.app.login.repository.UserRepository;
+import com.myvitalmate.app.nutrientLog.repository.NutrientLogRepository;
 import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
 import com.myvitalmate.app.userProfile.dto.PatientProfileUpdateDTO;
 import com.myvitalmate.app.userProfile.entity.Adresse;
@@ -24,7 +25,10 @@ import java.util.List;
 public class PatientService {
 
     @Autowired
-    private PatientProfileRepository repository;
+    private PatientProfileRepository patientProfilerepository;
+
+    @Autowired
+    private NutrientLogRepository nutrientLogRepository;
 
     @Autowired
     private PatientMapper patientMapper;
@@ -39,7 +43,7 @@ public class PatientService {
         User currentUser = getCurrentUser();
 
         if (currentUser.getRole() == Role.PATIENT) {
-            List<PatientProfile> existingProfiles = repository.findByUser(currentUser);
+            List<PatientProfile> existingProfiles = patientProfilerepository.findByUser(currentUser);
             if (!existingProfiles.isEmpty()) {
                 throw new ValidationException("As a patient, you can only create one profile.");
             }
@@ -62,11 +66,11 @@ public class PatientService {
 
         PatientProfile patient = patientMapper.toEntity(dto);
         patient.setUser(getCurrentUser());
-        repository.save(patient);
+        patientProfilerepository.save(patient);
     }
 
     public List<PatientProfileDTO> viewAllPatients() {
-        List<PatientProfile> patients = repository.findAll();
+        List<PatientProfile> patients = patientProfilerepository.findAll();
         if (patients.isEmpty()) {
             throw new RuntimeException("No patients found in database");
         }
@@ -82,24 +86,25 @@ public class PatientService {
 
     public List<PatientProfileDTO> viewMyPatients() {
         User currentUser = getCurrentUser();
-        List<PatientProfile> patients = repository.findByUser(currentUser);
+        List<PatientProfile> patients = patientProfilerepository.findByUser(currentUser);
         return patientMapper.toDtoList(patients);
     }
 
+    @Transactional
     public void deletePatientProfile(Long id) {
-        PatientProfile patient = repository.findById(id)
+        PatientProfile patient = patientProfilerepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Patient profile not found"));
 
         User currentUser = getCurrentUser();
         if (!patient.getUser().getId().equals(currentUser.getId())) {
             throw new RuntimeException("You don't have permission to delete this profile");
         }
-
-        repository.deleteById(id);
+        nutrientLogRepository.deleteByPatientId(id);
+        patientProfilerepository.deleteById(id);
     }
 
     public void updatePatientProfile(Long id, PatientProfileUpdateDTO dto) {
-        PatientProfile patient = repository.findById(id)
+        PatientProfile patient = patientProfilerepository.findById(id)
                 .orElseThrow(() -> new RuntimeException("Patient not found"));
 
         User currentUser = getCurrentUser();
@@ -122,7 +127,6 @@ public class PatientService {
         validationService.validateSickness(dto.sickness());
         validationService.validateGoals(dto.goals());
 
-        // Update all fields
         patient.setFirstName(dto.firstName());
         patient.setLastName(dto.lastName());
         patient.setAdresse(new Adresse(dto.adresse()));
@@ -134,7 +138,7 @@ public class PatientService {
         patient.setSickness(dto.sickness());
         patient.setGoals(dto.goals());
 
-        repository.save(patient);
+        patientProfilerepository.save(patient);
     }
 
 

@@ -16,6 +16,7 @@ public class PatientController {
     @Autowired
     private PatientService patientService;
 
+    //TODO change endpoint to blank.
     @PostMapping("/create")
     public ResponseEntity<Void> createPatientProfile(@RequestBody PatientProfileDTO patientProfileDto) {
         patientService.createPatientProfile(patientProfileDto);

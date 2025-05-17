@@ -1,6 +1,7 @@
 import React, {useEffect, useState} from 'react';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
+const LOGOUT_DELAY_MS = 20 * 60 * 60 * 1000; // 20 hours in milliseconds
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -9,11 +10,36 @@ const LoginPage: React.FC = () => {
     const [isLoggedIn, setIsLoggedIn] = useState(false);
 
     useEffect(() => {
-        const token = localStorage.getItem('token');
-        if (token) {
-            setIsLoggedIn(true);
-        }
+        checkTokenValidity();
+
+        window.addEventListener('beforeunload', handleLogout);
+
+        return () => {
+            window.removeEventListener('beforeunload', handleLogout);
+        };
     }, []);
+
+    const checkTokenValidity = async () => {
+        const token = localStorage.getItem('token');
+        const loginTime = localStorage.getItem('loginTime');
+
+        if (token && loginTime) {
+            const loginTimestamp = parseInt(loginTime, 10);
+            const now = Date.now();
+
+            if (now - loginTimestamp >= LOGOUT_DELAY_MS) {
+                handleLogout();
+                return;
+            }
+        }
+    };
+
+    const setAutoLogout = (timeout: number) => {
+        setTimeout(() => {
+            handleLogout();
+            alert('Session expired. You have been logged out automatically.');
+        }, timeout);
+    };
 
     const handleLogin = async (e: React.FormEvent) => {
         e.preventDefault();
@@ -31,10 +57,12 @@ const LoginPage: React.FC = () => {
 
             if (response.ok) {
                 localStorage.setItem('token', data.token);
+                localStorage.setItem('loginTime', Date.now().toString());
                 setIsLoggedIn(true);
                 setMessage('Login successful!');
+                setAutoLogout(LOGOUT_DELAY_MS);
             } else {
-                setMessage(data.message);
+                setMessage(data.message || 'Login failed');
                 setPassword('');
             }
         } catch (error) {
@@ -45,6 +73,7 @@ const LoginPage: React.FC = () => {
 
     const handleLogout = () => {
         localStorage.removeItem('token');
+        localStorage.removeItem('loginTime');
         setIsLoggedIn(false);
         setMessage('');
         setUsername('');

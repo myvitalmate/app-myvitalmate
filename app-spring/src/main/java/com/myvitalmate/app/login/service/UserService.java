@@ -3,12 +3,15 @@ package com.myvitalmate.app.login.service;
 import com.myvitalmate.app.login.dto.AuthResponseDTO;
 import com.myvitalmate.app.login.dto.LoginDTO;
 import com.myvitalmate.app.login.dto.RegistrationDTO;
+import com.myvitalmate.app.login.entity.Role;
 import com.myvitalmate.app.login.entity.User;
 import com.myvitalmate.app.login.repository.UserRepository;
 import com.myvitalmate.app.login.security.JwtTokenProvider;
 import com.myvitalmate.app.userProfile.service.ValidationService;
 import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.security.core.Authentication;
+import org.springframework.security.core.context.SecurityContextHolder;
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
@@ -66,5 +69,17 @@ public class UserService implements UserDetailsService {
 
         String token = jwtTokenProvider.createToken(user);
         return new AuthResponseDTO(token, user.getEmail(), user.getRole());
+    }
+
+    private User getCurrentUser() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String email = authentication.getName();
+        return userRepository.findByEmail(email)
+                .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
+    }
+
+    public Role getCurrentUserRole() {
+        User user = getCurrentUser();
+        return user.getRole();
     }
 }

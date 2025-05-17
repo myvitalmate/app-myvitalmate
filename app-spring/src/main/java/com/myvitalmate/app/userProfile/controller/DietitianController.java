@@ -16,6 +16,7 @@ public class DietitianController {
     @Autowired
     private DietitianService dietitianService;
 
+    //TODO change endpoint to blank.
     @PostMapping("/create")
     public ResponseEntity<Void> createDietitianProfile(@RequestBody DietitianProfileDTO dietitianProfileDTO) {
         dietitianService.createDietitianProfile(dietitianProfileDTO);

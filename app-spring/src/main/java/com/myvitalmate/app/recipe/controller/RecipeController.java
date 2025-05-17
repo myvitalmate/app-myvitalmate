@@ -2,7 +2,7 @@ package com.myvitalmate.app.recipe.controller;
 
 import com.myvitalmate.app.recipe.dto.RecipeIngredientsDTO;
 import com.myvitalmate.app.recipe.dto.RecipeInstructionsDTO;
-import com.myvitalmate.app.recipe.dto.RecipeResultsDTO;
+import com.myvitalmate.app.recipe.dto.RecipeResponseDTO;
 import com.myvitalmate.app.recipe.service.RecipeService;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -23,7 +23,7 @@ public class RecipeController {
 
     @GetMapping("/search/")
     public ResponseEntity<Map<String, Object>> getRecipesByName(@RequestParam("search_recipe_by_name") String searchRecipeByName) {
-        List<RecipeResultsDTO> recipes = recipeService.getRecipesByName(searchRecipeByName);
+        List<RecipeResponseDTO.RecipeItemDTO> recipes = recipeService.getRecipesByName(searchRecipeByName);
         return ResponseEntity.ok(Map.of("recipes", recipes));
     }
 

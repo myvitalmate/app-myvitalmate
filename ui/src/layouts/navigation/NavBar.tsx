@@ -5,10 +5,12 @@ export default function NavBar() {
         {name: "Home", href: "/"},
         {name: "Chat", href: "/chat"},
         {name: "Recipes", href: "/recipes"},
+        {name: "Dietprotocol", href: "/dietprotocol"},
         {name: "Profile", href: "/profile"},
         {name: "About", href: "/about"},
         {name: "Login", href: "/login"},
         {name: "Register", href: "/register"}
+
     ]
 
     return (
