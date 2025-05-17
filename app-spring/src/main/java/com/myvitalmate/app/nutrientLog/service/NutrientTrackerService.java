@@ -35,13 +35,28 @@ public class NutrientTrackerService {
 
     private static final Logger logger = LoggerFactory.getLogger(NutrientTrackerService.class);
     private static final List<String> MACRONUTRIENTS = List.of(
-            "Calories", "Protein", "Fat", "Carbohydrates", "Fiber", "Sugar"
+            "Calories", "Protein", "Fat", "Carbohydrates", "Fiber", "Sugar",
+            "Saturated Fat", "Monounsaturated Fat", "Polyunsaturated Fat", "Trans Fat",
+            "Cholesterol"
     );
     private static final List<String> MICRONUTRIENTS = List.of(
-            "Vitamin A", "Vitamin C", "Vitamin D", "Vitamin E", "Vitamin K",
-            "Calcium", "Iron", "Magnesium", "Potassium", "Sodium", "Zinc"
-    );
+            // Fat-soluble vitamins
+            "Vitamin A", "Vitamin D", "Vitamin E", "Vitamin K",
 
+            // Water-soluble vitamins
+            "Vitamin C", "Vitamin B1 (Thiamine)", "Vitamin B2 (Riboflavin)",
+            "Vitamin B3 (Niacin)", "Vitamin B5 (Pantothenic Acid)",
+            "Vitamin B6 (Pyridoxine)", "Vitamin B7 (Biotin)",
+            "Vitamin B9 (Folate)", "Vitamin B12 (Cobalamin)",
+
+            // Major minerals (macrominerals)
+            "Calcium", "Magnesium", "Phosphorus", "Potassium", "Sodium",
+            "Chloride", "Sulfur",
+
+            // Trace elements (microminerals)
+            "Iron", "Zinc", "Copper", "Manganese", "Iodine", "Selenium",
+            "Molybdenum", "Fluoride", "Chromium", "Cobalt"
+    );
     private final String base_url = "https://api.spoonacular.com";
     @Autowired
     private NutrientValuesMapper nutrientValuesMapper;
@@ -71,7 +86,7 @@ public class NutrientTrackerService {
                     url,
                     HttpMethod.GET,
                     null,
-                    new ParameterizedTypeReference<IngredientResponseDTO>() {
+                    new ParameterizedTypeReference<>() {
                     }
             );
 
@@ -242,5 +257,15 @@ public class NutrientTrackerService {
         return latestEntries.stream()
                 .map(this::convertToFoodEntryDTO)
                 .toList();
+    }
+
+    public void deleteFoodEntry(long foodId) {
+        try {
+            foodEntryRepository.findById(foodId)
+                    .orElseThrow(() -> new RuntimeException("Food entry not found"));
+        } catch (Exception e) {
+            throw new RuntimeException("Error deleting food entry: " + e.getMessage());
+        }
+        foodEntryRepository.deleteById(foodId);
     }
 }

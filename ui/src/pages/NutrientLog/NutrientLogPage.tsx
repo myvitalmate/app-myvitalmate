@@ -54,6 +54,12 @@ interface NutrientLogDTO {
     foodEntries: FoodEntryDTO[]
 }
 
+interface PatientProfileDTO {
+    id: number
+    firstName: string
+    lastName: string
+}
+
 const MACRO_NUTRIENTS = ["Calories", "Protein", "Fat", "Carbohydrates", "Fiber", "Sugar"];
 
 const NutrientLogPage = () => {
@@ -80,9 +86,67 @@ const NutrientLogPage = () => {
     const [loadingNutrientTotals, setLoadingNutrientTotals] = useState(false)
     const [latestEntries, setLatestEntries] = useState<FoodEntryDTO[]>([]);
     const [loadingLatestEntries, setLoadingLatestEntries] = useState(false);
+    const [userRole, setUserRole] = useState<string | null>(null)
+    const [patients, setPatients] = useState<PatientProfileDTO[]>([])
+    const [selectedPatient, setSelectedPatient] = useState<PatientProfileDTO | null>(null)
+    const [loadingPatients, setLoadingPatients] = useState(false)
+
+    useEffect(() => {
+        const fetchUserRole = () => {
+            const token = localStorage.getItem('token')
+            if (token) {
+                try {
+                    const payload = token.split('.')[1]
+                    const decodedPayload = JSON.parse(atob(payload))
+                    setUserRole(decodedPayload.role)
+                } catch (error) {
+                    console.error("Error parsing token:", error)
+                }
+            }
+        }
+        fetchUserRole()
+    }, [])
+
+    useEffect(() => {
+        const fetchPatients = async () => {
+            if (userRole !== 'DIETITIAN') return
+
+            setLoadingPatients(true)
+            try {
+                const token = localStorage.getItem("token")
+                const response = await fetch(`${BASE_URL}/patients/viewAll`, {
+                    headers: {
+                        Authorization: `Bearer ${token}`,
+                    },
+                })
+
+                if (!response.ok) {
+                    throw new Error(`Error: ${response.status}`)
+                }
+
+                const patientsList = await response.json()
+                setPatients(patientsList)
+
+                if (patientsList.length > 0) {
+                    setSelectedPatient(patientsList[0])
+                    setPatientProfileId(patientsList[0].id)
+                }
+            } catch (err) {
+                console.error("Error fetching patients:", err)
+                setError(err instanceof Error ? err.message : "Failed to fetch patients")
+            } finally {
+                setLoadingPatients(false)
+            }
+        }
+
+        fetchPatients()
+    }, [userRole])
 
     useEffect(() => {
         const fetchPatientProfileId = async () => {
+            // Skip this for dietitians as they'll use the patient selector
+            if (userRole === 'DIETITIAN') return
+
             try {
                 const token = localStorage.getItem("token")
                 if (!token) {
@@ -118,7 +182,7 @@ const NutrientLogPage = () => {
         }
 
         fetchPatientProfileId()
-    }, [])
+    }, [userRole])
 
     const searchIngredients = async () => {
         if (!ingredientName.trim()) return
@@ -278,16 +342,16 @@ const NutrientLogPage = () => {
 
     const fetchLatestEntries = async () => {
         if (!patientProfileId) return;
-        
+
         setLoadingLatestEntries(true);
         try {
             const response = await fetch(
                 `${BASE_URL}/nutrients/latest-entries?patientId=${patientProfileId}&limit=10`,
                 {
-                    headers: { Authorization: `Bearer ${localStorage.getItem("token")}` }
+                    headers: {Authorization: `Bearer ${localStorage.getItem("token")}`}
                 }
             );
-            
+
             if (response.ok) {
                 const data = await response.json();
                 setLatestEntries(data);
@@ -298,6 +362,18 @@ const NutrientLogPage = () => {
             setLoadingLatestEntries(false);
         }
     };
+
+
+    const handlePatientChange = (patientId: string) => {
+        const patient = patients.find(p => p.id.toString() === patientId)
+        if (patient) {
+            setSelectedPatient(patient)
+            setPatientProfileId(patient.id)
+            fetchNutrientLog(patient.id)
+            fetchNutrientTotals()
+            fetchLatestEntries()
+        }
+    }
 
     useEffect(() => {
         if (patientProfileId) {
@@ -318,6 +394,36 @@ const NutrientLogPage = () => {
         <main className="min-h-screen bg-white p-8">
             <div className="max-w-4xl mx-auto">
                 <h1 className="text-3xl font-bold mb-6 text-center">Nutrient Log</h1>
+
+                {userRole === 'DIETITIAN' && (
+                    <div className="mb-6 flex justify-center">
+                        <div className="w-[300px]">
+                            <label className="text-sm font-medium mb-2 block">Select Patient:</label>
+                            {loadingPatients ? (
+                                <Skeleton className="h-9 w-full"/>
+                            ) : (
+                                <Select
+                                    value={selectedPatient?.id?.toString() || ""}
+                                    onValueChange={(value) => handlePatientChange(value)}
+                                >
+                                    <SelectTrigger>
+                                        <SelectValue placeholder="Select a patient"/>
+                                    </SelectTrigger>
+                                    <SelectContent>
+                                        {patients.map((patient) => (
+                                            <SelectItem
+                                                key={patient.id}
+                                                value={patient.id.toString()}
+                                            >
+                                                {patient.firstName} {patient.lastName}
+                                            </SelectItem>
+                                        ))}
+                                    </SelectContent>
+                                </Select>
+                            )}
+                        </div>
+                    </div>
+                )}
 
                 <Tabs value={activeTab} onValueChange={setActiveTab} className="w-full">
                     <TabsList className="grid w-full grid-cols-3 mb-6">
