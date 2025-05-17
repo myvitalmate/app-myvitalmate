@@ -668,7 +668,6 @@ const Profile = () => {
                                                             <Button
                                                                 variant="destructive"
                                                                 size="sm"
-                                                                className="text-destructive hover:bg-destructive/10 hover:text-destructive border-destructive/30"
                                                                 onClick={() => handleDelete(dietitian.id, "dietitian")}
                                                             >
                                                                 Delete

@@ -76,4 +76,12 @@ public class NutrientController {
         List<FoodEntryDTO> latestEntries = nutrientTrackerService.getLatestFoodEntries(patientId, limit);
         return ResponseEntity.ok(latestEntries);
     }
+
+    @DeleteMapping("")
+    public ResponseEntity<Void> deleteFoodEntry(
+            @RequestParam long foodId
+    ) {
+        nutrientTrackerService.deleteFoodEntry(foodId);
+        return ResponseEntity.ok().build();
+    }
 }
