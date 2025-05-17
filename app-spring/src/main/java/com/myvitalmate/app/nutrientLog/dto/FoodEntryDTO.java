@@ -4,6 +4,7 @@ import java.time.LocalDateTime;
 import java.util.List;
 
 public record FoodEntryDTO(
+        Long id,
         String ingredientName,
         int ingredientId,
         double amount,

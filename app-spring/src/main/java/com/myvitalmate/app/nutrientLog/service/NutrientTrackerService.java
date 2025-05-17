@@ -161,6 +161,7 @@ public class NutrientTrackerService {
                 });
 
         FoodEntryEntity foodEntry = new FoodEntryEntity();
+        foodEntry.setId(foodDto.id());
         foodEntry.setIngredientName(foodDto.ingredientName());
         foodEntry.setIngredientId(foodDto.ingredientId());
         foodEntry.setAmount(foodDto.amount());
@@ -209,6 +210,7 @@ public class NutrientTrackerService {
                 .toList();
 
         return new FoodEntryDTO(
+                entity.getId(),
                 entity.getIngredientName(),
                 entity.getIngredientId(),
                 entity.getAmount(),

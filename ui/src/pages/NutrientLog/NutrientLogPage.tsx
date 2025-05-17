@@ -19,6 +19,7 @@ import {
 import {Label} from "@/components/ui/label"
 import {format, subDays} from "date-fns"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
+import { toast } from "@/components/ui/use-toast"
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL
 const SPOONACULAR_IMAGE_BASE_URL = "https://spoonacular.com/cdn/ingredients_100x100/"
@@ -40,6 +41,7 @@ interface NutrientTotalDTO {
 }
 
 interface FoodEntryDTO {
+    id: number
     ingredientName: string
     ingredientId?: number
     amount: number
@@ -363,6 +365,24 @@ const NutrientLogPage = () => {
         }
     };
 
+    const deleteFoodEntry = async (foodId: number) => {
+        try {
+            const response = await fetch(`${BASE_URL}/nutrients?foodId=${foodId}`, {
+                method: "DELETE",
+                headers: {
+                    Authorization: `Bearer ${localStorage.getItem("token")}`,
+                },
+            });
+
+            if (!response.ok) throw new Error(`Error: ${response.status}`);
+
+            // Refresh the nutrient log after deletion
+            if (patientProfileId) fetchNutrientLog(patientProfileId);
+        } catch (err) {
+            console.error("Error deleting food entry:", err);
+            setError(err instanceof Error ? err.message : "Failed to delete food entry");
+        }
+    };
 
     const handlePatientChange = (patientId: string) => {
         const patient = patients.find(p => p.id.toString() === patientId)
@@ -539,9 +559,19 @@ const NutrientLogPage = () => {
                                                 <CardContent className="p-4">
                                                     <div className="flex justify-between items-center mb-2">
                                                         <h3 className="font-medium text-lg">{entry.ingredientName}</h3>
-                                                        <Badge variant="outline">
-                                                            {entry.amount} {entry.unit}
-                                                        </Badge>
+                                                        <div className="flex items-center gap-2">
+                                                            <Badge variant="outline">
+                                                                {entry.amount} {entry.unit}
+                                                            </Badge>
+                                                            <Button
+                                                                variant="destructive"
+                                                                size="sm"
+                                                                onClick={() => deleteFoodEntry(entry.id)}
+                                                                className="h-7 px-2"
+                                                            >
+                                                                Delete
+                                                            </Button>
+                                                        </div>
                                                     </div>
                                                     <div className="grid grid-cols-2 gap-2 mt-3">
                                                         {entry.nutrients
