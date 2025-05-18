@@ -19,7 +19,6 @@ import {
 import {Label} from "@/components/ui/label"
 import {format, subDays} from "date-fns"
 import {Select, SelectContent, SelectItem, SelectTrigger, SelectValue} from "@/components/ui/select"
-import { toast } from "@/components/ui/use-toast"
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL
 const SPOONACULAR_IMAGE_BASE_URL = "https://spoonacular.com/cdn/ingredients_100x100/"
@@ -146,7 +145,6 @@ const NutrientLogPage = () => {
 
     useEffect(() => {
         const fetchPatientProfileId = async () => {
-            // Skip this for dietitians as they'll use the patient selector
             if (userRole === 'DIETITIAN') return
 
             try {
