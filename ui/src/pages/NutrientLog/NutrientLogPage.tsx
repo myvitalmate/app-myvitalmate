@@ -401,6 +401,12 @@ const NutrientLogPage = () => {
         }
     }, [patientProfileId]);
 
+    useEffect(() => {
+        if (activeTab === "nutrient-totals" && patientProfileId) {
+            fetchNutrientTotals();
+        }
+    }, [activeTab, patientProfileId]);
+
     const handleDateRangeChange = (type: 'startDate' | 'endDate', value: string) => {
         setDateRange(prev => ({
             ...prev,

@@ -44,7 +44,7 @@ public class UserService implements UserDetailsService {
         if (userRepository.existsByEmail(registrationDTO.email())) {
             throw new IllegalArgumentException("Email already in use");
         }
-        validationService.validateEmail(registrationDTO.email());
+        //validationService.validateEmail(registrationDTO.email());
         validationService.validatePassword(registrationDTO.password());
         validationService.validateRole(registrationDTO.role().name());
 

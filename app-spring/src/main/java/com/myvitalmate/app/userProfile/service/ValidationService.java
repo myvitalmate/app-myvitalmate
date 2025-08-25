@@ -30,14 +30,14 @@ public class ValidationService {
     }
 
 
-    public void validateEmail(String email) {
-        validateIsNotEmpty(email, "Email");
+    /* public void validateEmail(String email) {
+         validateIsNotEmpty(email, "Email");
 
-        if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
-            throw new ValidationException("Invalid or missing Email.");
-        }
-    }
-
+         if (!email.matches("^[a-zA-Z0-9._%+-]+@[a-zA-Z0-9.-]+\\.[a-zA-Z]{2,}$")) {
+             throw new ValidationException("Invalid or missing Email.");
+         }
+     }
+ */
     public void validatePhoneNumber(String phone) {
         validateIsNotEmpty(phone, "Phone Number");
 
@@ -100,7 +100,7 @@ public class ValidationService {
     public void validatePassword(String password) {
         validateIsNotEmpty(password, "Password");
 
-        if (!password.matches(".*[A-Z].*")) {
+        /*if (!password.matches(".*[A-Z].*")) {
             throw new ValidationException("Password must contain at least one uppercase letter");
         }
         if (!password.matches(".*[0-9].*")) {
@@ -112,6 +112,7 @@ public class ValidationService {
         if (!password.matches(".*[a-z].*")) {
             throw new ValidationException("Password must contain at least one lowercase letter");
         }
+         */
     }
 
     public void validateGoals(String goals) {

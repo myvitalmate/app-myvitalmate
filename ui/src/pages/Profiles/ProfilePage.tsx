@@ -33,6 +33,7 @@ interface Profile {
     goals?: string
     sickness?: string
     specialty?: string
+
 }
 
 type FormData = {
@@ -53,7 +54,6 @@ type FormData = {
     sickness?: string
 }
 
-// Enhanced helper function to extract name from email with number filtering
 const extractNameFromEmail = (email: string): { firstName: string, lastName: string } => {
     const defaultResult = {firstName: "", lastName: ""};
 
@@ -61,18 +61,13 @@ const extractNameFromEmail = (email: string): { firstName: string, lastName: str
         return defaultResult;
     }
 
-    // Get the part before @
     const beforeAt = email.split('@')[0];
 
-    // Helper function to clean names (remove numbers and capitalize)
     const cleanName = (name: string): string => {
-        // Remove all digits
         const withoutNumbers = name.replace(/\d/g, '');
-        // Capitalize first letter
         return withoutNumbers.charAt(0).toUpperCase() + withoutNumbers.slice(1);
     };
 
-    // Case 1: firstname.lastname format
     if (beforeAt.includes('.')) {
         const nameParts = beforeAt.split('.');
         if (nameParts.length >= 2) {
@@ -82,7 +77,6 @@ const extractNameFromEmail = (email: string): { firstName: string, lastName: str
         }
     }
 
-    // Case 2: firstname_lastname format
     if (beforeAt.includes('_')) {
         const nameParts = beforeAt.split('_');
         if (nameParts.length >= 2) {
@@ -92,7 +86,6 @@ const extractNameFromEmail = (email: string): { firstName: string, lastName: str
         }
     }
 
-    // Case 3: firstnamelastname format (camelCase)
     const camelCaseMatch = beforeAt.match(/([a-z]+)([A-Z][a-z]+)/);
     if (camelCaseMatch && camelCaseMatch.length >= 3) {
         const firstName = cleanName(camelCaseMatch[1]);
@@ -100,7 +93,6 @@ const extractNameFromEmail = (email: string): { firstName: string, lastName: str
         return {firstName, lastName};
     }
 
-    // Case 4: Just use the email username as the first name
     if (beforeAt) {
         const firstName = cleanName(beforeAt);
         return {firstName, lastName: ""};
@@ -141,9 +133,18 @@ const Profile = () => {
     })
 
     const [errors, setErrors] = useState<Record<string, string>>({})
+    const [error, setError] = useState<string | null>(null)
 
     const fetchProfiles = async () => {
         setIsLoading(true);
+        setError (null);
+
+        const token = localStorage.getItem("token");
+
+        if (!token) {
+            setError("You must be logged in to use this feature");
+            return;
+        }
         try {
             setDietitians([]);
             setPatients([]);
@@ -181,7 +182,6 @@ const Profile = () => {
         setActiveView("view");
         setEditingProfile(null);
 
-        // Get email from token and extract name
         const token = localStorage.getItem('token');
         let email = "";
         let firstName = "";
@@ -309,7 +309,7 @@ const Profile = () => {
             }
         })
 
-        if (formData.email && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(formData.email)) {
+        if (formData.email && !/@/.test(formData.email)) {
             newErrors.email = "Please enter a valid email address"
         }
 
@@ -609,6 +609,12 @@ const Profile = () => {
                         </Button>
                     </div>
                 </div>
+
+                { error && (
+                    <div className="text-red-500 bg-red-100 border border-red-300 p-3 rounded-md">
+                        {error}
+                    </div>
+                )}
 
                 {activeView === "view" && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">

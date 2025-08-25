@@ -47,7 +47,7 @@ public class DietitianService {
         validationService.validateStreet(dto.adresse().street());
         validationService.validateCountry(dto.adresse().country());
         validationService.validatePostalcode(dto.adresse().postalCode());
-        validationService.validateEmail(dto.contact().email());
+        //validationService.validateEmail(dto.contact().email());
         validationService.validatePhoneNumber(dto.contact().phoneNumber());
         validationService.validateGender(dto.gender());
         validationService.validateBirthday(dto.birthday());
@@ -106,7 +106,7 @@ public class DietitianService {
         validationService.validateStreet(dto.adresse().street());
         validationService.validateCountry(dto.adresse().country());
         validationService.validatePostalcode(dto.adresse().postalCode());
-        validationService.validateEmail(dto.contact().email());
+        //validationService.validateEmail(dto.contact().email());
         validationService.validatePhoneNumber(dto.contact().phoneNumber());
         validationService.validateGender(dto.gender());
         validationService.validateBirthday(dto.birthday());
