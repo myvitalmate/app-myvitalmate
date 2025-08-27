@@ -33,7 +33,6 @@ interface Profile {
     goals?: string
     sickness?: string
     specialty?: string
-
 }
 
 type FormData = {
@@ -133,11 +132,11 @@ const Profile = () => {
     })
 
     const [errors, setErrors] = useState<Record<string, string>>({})
-    const [error, setError] = useState<string | null>(null)
+    //const [error, setError] = useState<string | null>(null)
 
     const fetchProfiles = async () => {
         setIsLoading(true);
-        setError (null);
+       /* setError (null);
 
         const token = localStorage.getItem("token");
 
@@ -145,6 +144,7 @@ const Profile = () => {
             setError("You must be logged in to use this feature");
             return;
         }
+        */
         try {
             setDietitians([]);
             setPatients([]);
@@ -523,7 +523,6 @@ const Profile = () => {
                 setMessageType("success");
                 setEditingProfile(null);
 
-                // Get email from token and extract name
                 const token = localStorage.getItem('token');
                 let email = "";
                 let firstName = "";
@@ -609,12 +608,6 @@ const Profile = () => {
                         </Button>
                     </div>
                 </div>
-
-                { error && (
-                    <div className="text-red-500 bg-red-100 border border-red-300 p-3 rounded-md">
-                        {error}
-                    </div>
-                )}
 
                 {activeView === "view" && (
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
