@@ -53,10 +53,11 @@ All data is stored in your personal account using **JWT authentication**.
 - **User Authentication:** Registration and login with role separation (Patient and Dietitian).
 - **Chatbot:** Powered by a GPT model and a local llama model (Tab: *Chat*).
 - **Recipe Search:** Fetch recipes via API, including ingredients and step-by-step instructions (Tab: *Recipes*).
-- **Nutrition Log:** Track your food intake per user and role. Dietitians can also view the logs of their patients (Tab:
-  *Diet Protocol*).
 - **Patient Management:** Simple overview of patient profiles, available only to dietitians as a first step towards
   managing patients (Tab: *Profile*).
+- **Nutrition Log:** Track your food intake per user (only as a Patient). Dietitians can also view the logs of their
+  patients (Tab:
+  *Diet Protocol*).
 
 ---
 
