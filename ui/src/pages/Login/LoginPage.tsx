@@ -2,6 +2,7 @@ import React, {useEffect, useState} from 'react';
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 const LOGOUT_DELAY_MS = 20 * 60 * 60 * 1000; // 20 hours in milliseconds
+let logoutTimer: ReturnType<typeof setTimeout> | null = null;
 
 const LoginPage: React.FC = () => {
     const [username, setUsername] = useState('');
@@ -11,34 +12,86 @@ const LoginPage: React.FC = () => {
 
     useEffect(() => {
         checkTokenValidity();
-
-        window.addEventListener('beforeunload', handleLogout);
-
-        return () => {
-            window.removeEventListener('beforeunload', handleLogout);
-        };
     }, []);
 
-    const checkTokenValidity = async () => {
+
+    const checkTokenValidity = () => {
         const token = localStorage.getItem('token');
         const loginTime = localStorage.getItem('loginTime');
 
-        if (token && loginTime) {
-            const loginTimestamp = parseInt(loginTime, 10);
-            const now = Date.now();
+        if (!token || !loginTime) {
+            handleLogout();
+            return;
+        }
 
-            if (now - loginTimestamp >= LOGOUT_DELAY_MS) {
-                handleLogout();
-                return;
-            }
+        const loginTimestamp = parseInt(loginTime, 10);
+        const now = Date.now();
+        const remainingTime = LOGOUT_DELAY_MS - (now - loginTimestamp);
+
+        if (remainingTime <= 0) {
+            handleLogout();
+        } else {
+            setIsLoggedIn(true);
+            setAutoLogout(remainingTime);
         }
     };
 
+
     const setAutoLogout = (timeout: number) => {
-        setTimeout(() => {
+        if (logoutTimer) {
+            clearTimeout(logoutTimer);
+        }
+
+        logoutTimer = setTimeout(() => {
             handleLogout();
             alert('Session expired. You have been logged out automatically.');
         }, timeout);
+    };
+
+
+    const createAnonymousPatient = async (e: React.FormEvent) => {
+        e.preventDefault();
+
+        try {
+            const authResponse = await fetch(`${BASE_URL}/auth/anonymous`, {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                },
+                body: JSON.stringify({}),
+            });
+
+            const authData = await authResponse.json();
+
+            if (authResponse.ok) {
+                localStorage.setItem('token', authData.token);
+                localStorage.setItem('loginTime', Date.now().toString());
+
+
+                const patientResponse = await fetch(`${BASE_URL}/patients/create/anonymous`, {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${authData.token}`
+                    },
+                    body: JSON.stringify({}),
+                });
+
+                if (patientResponse.ok) {
+                    setIsLoggedIn(true);
+                    setAutoLogout(LOGOUT_DELAY_MS);
+                    setMessage('Anonymous session created successfully!');
+                }
+                else {
+                    setMessage('Failed to create anonymous patient');
+                }
+            } else {
+                setMessage(authData.message || 'Anonymous login failed');
+            }
+        } catch (error) {
+            setMessage('Network error. Please try again later.');
+            console.error('Anonymous login error:', error);
+        }
     };
 
     const handleLogin = async (e: React.FormEvent) => {
@@ -58,10 +111,12 @@ const LoginPage: React.FC = () => {
             if (response.ok) {
                 localStorage.setItem('token', data.token);
                 localStorage.setItem('loginTime', Date.now().toString());
+
                 setIsLoggedIn(true);
-                setMessage('Login successful!');
                 setAutoLogout(LOGOUT_DELAY_MS);
-            } else {
+                setMessage('Login successful!');
+            }
+            else {
                 setMessage(data.message || 'Login failed');
                 setPassword('');
             }
@@ -72,13 +127,20 @@ const LoginPage: React.FC = () => {
     };
 
     const handleLogout = () => {
+        if (logoutTimer) {
+            clearTimeout(logoutTimer);
+            logoutTimer = null;
+        }
+
         localStorage.removeItem('token');
         localStorage.removeItem('loginTime');
+
         setIsLoggedIn(false);
         setMessage('');
         setUsername('');
         setPassword('');
     };
+
 
     return (
         <div className="max-w-md mx-auto p-6 bg-white rounded shadow-md">
@@ -136,6 +198,14 @@ const LoginPage: React.FC = () => {
                     </button>
                 </div>
             )}
+            <div className="mt-4 text-center">
+                <button
+                    onClick={createAnonymousPatient}
+                    className="w-full p-2 bg-gray-500 text-white rounded hover:bg-gray-600"
+                >
+                    Continue as Guest
+                </button>
+            </div>
         </div>
     );
 };

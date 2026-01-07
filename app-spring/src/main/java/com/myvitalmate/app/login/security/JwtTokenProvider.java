@@ -1,5 +1,6 @@
 package com.myvitalmate.app.login.security;
 
+import com.myvitalmate.app.login.entity.Role;
 import com.myvitalmate.app.login.entity.User;
 import io.jsonwebtoken.*;
 import io.jsonwebtoken.security.Keys;
@@ -15,6 +16,7 @@ import org.springframework.stereotype.Component;
 
 import java.security.Key;
 import java.util.Date;
+import java.util.UUID;
 
 @Component
 public class JwtTokenProvider {
@@ -53,11 +55,51 @@ public class JwtTokenProvider {
                 .compact();
     }
 
-    public Authentication getAuthentication(String token) { //starts userDetailsService when needed
+    public String createToken(UUID anonymousPatientId) {
+        Claims claims = Jwts.claims();
+        claims.put("role", Role.ANONYMOUS_PATIENT.name());
+        claims.put("id", anonymousPatientId.toString());
+
+        Date now = new Date();
+        Date validity = new Date(now.getTime() + validityInMilliseconds);
+
+        return Jwts.builder()
+                .setClaims(claims)
+                .setIssuedAt(now)
+                .setExpiration(validity)
+                .signWith(key, SignatureAlgorithm.HS256)
+                .compact();
+    }
+
+
+    public Authentication getAuthentication(String token) {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        String subject = claims.getSubject();
+
+        // Handle anonymous users (no subject/email)
+        if (subject == null || subject.isEmpty()) {
+            String anonymousId = (String) claims.get("id");
+            String role = (String) claims.get("role");
+
+            UserDetails anonymousUser = org.springframework.security.core.userdetails.User.builder()
+                    .username("anonymous_" + anonymousId)
+                    .password("")
+                    .authorities("ROLE_" + role)
+                    .build();
+
+            return new UsernamePasswordAuthenticationToken(
+                    anonymousUser,
+                    "",
+                    anonymousUser.getAuthorities()
+            );
+
+        }
+
+        // Handle regular users
         if (userDetailsService == null) {
             userDetailsService = applicationContext.getBean(UserDetailsService.class);
         }
-        UserDetails userDetails = userDetailsService.loadUserByUsername(getUsername(token));
+        UserDetails userDetails = userDetailsService.loadUserByUsername(subject);
         return new UsernamePasswordAuthenticationToken(userDetails, "", userDetails.getAuthorities());
     }
 
@@ -72,5 +114,16 @@ public class JwtTokenProvider {
         } catch (JwtException | IllegalArgumentException e) {
             return false;
         }
+    }
+
+    public boolean isAnonymousToken(String token) {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        return claims.getSubject() == null || claims.getSubject().isEmpty();
+    }
+
+    public UUID getAnonymousId(String token) {
+        Claims claims = Jwts.parserBuilder().setSigningKey(key).build().parseClaimsJws(token).getBody();
+        String id = (String) claims.get("id");
+        return UUID.fromString(id);
     }
 }

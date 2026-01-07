@@ -9,6 +9,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.time.LocalDate;
 import java.util.List;
+import java.util.UUID;
 
 @RestController
 @RequestMapping(value = "nutrients")
@@ -30,14 +31,16 @@ public class NutrientController {
     @PostMapping("/log-food")
     public ResponseEntity<?> logFood(
             @RequestBody FoodEntryDTO dto,
-            @RequestParam Long patientId,
+            @RequestParam(required = false) Long patientId,
+            @RequestParam(required = false) UUID anonymousPatientId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate logDate
     ) {
-        nutrientTrackerService.logFoodEntry(dto, patientId, logDate);
+        nutrientTrackerService.logFoodEntry(dto, patientId, anonymousPatientId, logDate);
         return ResponseEntity.ok("Food entry logged.");
     }
 
     @GetMapping("/log")
+    
     public ResponseEntity<NutrientLogDTO> getNutrientLog(
             @RequestParam Long patientId,
             @RequestParam @DateTimeFormat(iso = DateTimeFormat.ISO.DATE) LocalDate logDate

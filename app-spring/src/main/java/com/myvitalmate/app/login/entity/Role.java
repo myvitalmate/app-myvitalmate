@@ -2,5 +2,6 @@ package com.myvitalmate.app.login.entity;
 
 public enum Role {
     PATIENT,
-    DIETITIAN
+    USER, DIETITIAN,
+    ANONYMOUS_PATIENT
 }

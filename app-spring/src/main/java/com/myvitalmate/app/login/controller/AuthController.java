@@ -1,5 +1,6 @@
 package com.myvitalmate.app.login.controller;
 
+import com.myvitalmate.app.login.dto.AnonymousAuthResponseDTO;
 import com.myvitalmate.app.login.dto.AuthResponseDTO;
 import com.myvitalmate.app.login.dto.LoginDTO;
 import com.myvitalmate.app.login.dto.RegistrationDTO;
@@ -31,4 +32,11 @@ public class AuthController {
         AuthResponseDTO authResponse = userService.login(loginDTO);
         return ResponseEntity.ok(authResponse);
     }
+
+    @PostMapping("/anonymous")
+    public ResponseEntity<AnonymousAuthResponseDTO> createAnonymousToken() {
+        AnonymousAuthResponseDTO authResponse = userService.createAnonymousToken();
+        return ResponseEntity.ok(authResponse);
+    }
+
 }
