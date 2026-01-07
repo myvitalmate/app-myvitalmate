@@ -5,7 +5,11 @@ import com.myvitalmate.app.userProfile.entity.PatientProfile;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 public interface PatientProfileRepository extends JpaRepository<PatientProfile, Long> {
     List<PatientProfile> findByUser(User user);
+
+    Optional<PatientProfile> findByAnonymousUuid(UUID anonymousUuid);
 }

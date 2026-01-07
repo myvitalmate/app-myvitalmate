@@ -1,5 +1,6 @@
 package com.myvitalmate.app.login.service;
 
+import com.myvitalmate.app.login.dto.AnonymousAuthResponseDTO;
 import com.myvitalmate.app.login.dto.AuthResponseDTO;
 import com.myvitalmate.app.login.dto.LoginDTO;
 import com.myvitalmate.app.login.dto.RegistrationDTO;
@@ -17,6 +18,8 @@ import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+
+import java.util.UUID;
 
 @Service
 public class UserService implements UserDetailsService {
@@ -71,6 +74,16 @@ public class UserService implements UserDetailsService {
         return new AuthResponseDTO(token, user.getEmail(), user.getRole());
     }
 
+    public AnonymousAuthResponseDTO createAnonymousToken() {
+        UUID anonymousId = UUID.randomUUID();
+        String token = jwtTokenProvider.createToken(anonymousId);
+
+        return new AnonymousAuthResponseDTO(
+                token,
+                Role.ANONYMOUS_PATIENT.name()
+        );
+    }
+
     private User getCurrentUser() {
         Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
         String email = authentication.getName();
@@ -78,8 +91,8 @@ public class UserService implements UserDetailsService {
                 .orElseThrow(() -> new UsernameNotFoundException("User not found with email: " + email));
     }
 
-    public Role getCurrentUserRole() {
-        User user = getCurrentUser();
-        return user.getRole();
-    }
+    // public Role getCurrentUserRole() {
+    //     User user = getCurrentUser();
+    //     return user.getRole();
+    // }
 }
