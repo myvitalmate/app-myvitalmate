@@ -256,7 +256,11 @@ const NutrientLogPage = () => {
 
             if (!response.ok) throw new Error(`Failed to log food entry: ${response.status}`)
 
-            if (patientProfileId) fetchNutrientLog(patientProfileId)
+            if (patientProfileId) {
+                fetchNutrientLog(patientProfileId)
+                fetchNutrientTotals()
+                fetchLatestEntries()
+            }
 
             setShowAddDialog(false)
             setSelectedIngredient(null)
@@ -374,8 +378,12 @@ const NutrientLogPage = () => {
 
             if (!response.ok) throw new Error(`Error: ${response.status}`);
 
-            // Refresh the nutrient log after deletion
-            if (patientProfileId) fetchNutrientLog(patientProfileId);
+            // Refresh all data after deletion
+            if (patientProfileId) {
+                fetchNutrientLog(patientProfileId)
+                fetchNutrientTotals()
+                fetchLatestEntries()
+            }
         } catch (err) {
             console.error("Error deleting food entry:", err);
             setError(err instanceof Error ? err.message : "Failed to delete food entry");

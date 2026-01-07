@@ -42,7 +42,7 @@ interface ChatMessage {
 
 const ChatPage: React.FC = () => {
     const [userInput, setUserInput] = useState<string>('');
-    const [selectedModel, setSelectedModel] = useState<string>('llama');
+    const [selectedModel, setSelectedModel] = useState<string>('gpt');
     const [history, setHistory] = useState<ChatMessage[]>([]);
     const scrollAreaRef = useRef<HTMLDivElement>(null);
 
@@ -53,7 +53,7 @@ const ChatPage: React.FC = () => {
     const handleSend = async () => {
         setUserInput('');
         if (userInput.trim()) {
-            console.log("Sending:", userInput, "Using model:", selectedModel);
+            //console.log("Sending:", userInput, "Using model:", selectedModel);
 
             setHistory((prevHistory) => [...prevHistory, {content: userInput, isUser: true}]);
 
@@ -104,7 +104,7 @@ const ChatPage: React.FC = () => {
                         onChange={handleInputChange}
                         onKeyPress={handleKeyPress}
                         placeholder="Type your message"
-                        className="w-full"
+                        className="w-full h-24"
                     />
                     <div className="flex justify-between w-full">
                         <Button onClick={handleSend}>Send</Button>
@@ -114,7 +114,7 @@ const ChatPage: React.FC = () => {
                             </SelectTrigger>
                             <SelectContent>
                                 <SelectItem value="gpt">GPT</SelectItem>
-                                <SelectItem value="llama">Llama</SelectItem>
+                                {/* <SelectItem value="llama">Llama</SelectItem> */}
                             </SelectContent>
                         </Select>
                     </div>

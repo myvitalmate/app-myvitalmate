@@ -25,10 +25,7 @@ import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
 
 import java.time.LocalDate;
-import java.util.ArrayList;
-import java.util.HashMap;
-import java.util.List;
-import java.util.Map;
+import java.util.*;
 
 @Service
 public class NutrientTrackerService {
@@ -147,18 +144,30 @@ public class NutrientTrackerService {
     }
 
     @Transactional
-    public void logFoodEntry(FoodEntryDTO foodDto, Long patientId, LocalDate logDate) {
-        NutrientLogEntity nutrientLog = nutrientLogRepository
-                .findByPatientIdAndLogDate(patientId, logDate)
-                .orElseGet(() -> {
-                    PatientProfile patient = new PatientProfile();
-                    patient.setId(patientId);
+    public void logFoodEntry(FoodEntryDTO foodDto, Long patientId, UUID anonymousPatientId, LocalDate logDate) {
+        NutrientLogEntity nutrientLog;
+        if (patientId != null) {
+            nutrientLog = nutrientLogRepository
+                    .findByPatientIdAndLogDate(patientId, logDate)
+                    .orElseGet(() -> {
+                        PatientProfile patient = new PatientProfile();
+                        patient.setId(patientId);
 
-                    NutrientLogEntity newLog = new NutrientLogEntity();
-                    newLog.setPatient(patient);
-                    newLog.setLogDate(logDate);
-                    return nutrientLogRepository.save(newLog);
-                });
+                        NutrientLogEntity newLog = new NutrientLogEntity();
+                        newLog.setPatient(patient);
+                        newLog.setLogDate(logDate);
+                        return nutrientLogRepository.save(newLog);
+                    });
+        } else {
+            nutrientLog = nutrientLogRepository
+                    .findByAnonymousPatientIdAndLogDate(anonymousPatientId, logDate)
+                    .orElseGet(() -> {
+                        NutrientLogEntity newLog = new NutrientLogEntity();
+                        newLog.setAnonymousPatientId(anonymousPatientId);
+                        newLog.setLogDate(logDate);
+                        return nutrientLogRepository.save(newLog);
+                    });
+        }
 
         FoodEntryEntity foodEntry = new FoodEntryEntity();
         foodEntry.setId(foodDto.id());

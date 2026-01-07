@@ -5,9 +5,12 @@ import org.springframework.data.jpa.repository.JpaRepository;
 
 import java.time.LocalDate;
 import java.util.Optional;
+import java.util.UUID;
 
 public interface NutrientLogRepository extends JpaRepository<NutrientLogEntity, Long> {
     Optional<NutrientLogEntity> findByPatientIdAndLogDate(Long patientId, LocalDate logDate);
+
+    Optional<NutrientLogEntity> findByAnonymousPatientIdAndLogDate(UUID anonymousId, LocalDate logDate);
 
     void deleteByPatientId(Long patientId);
 }

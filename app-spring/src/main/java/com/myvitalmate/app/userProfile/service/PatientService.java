@@ -4,6 +4,7 @@ import com.myvitalmate.app.login.entity.Role;
 import com.myvitalmate.app.login.entity.User;
 import com.myvitalmate.app.login.repository.UserRepository;
 import com.myvitalmate.app.nutrientLog.repository.NutrientLogRepository;
+import com.myvitalmate.app.userProfile.dto.AnonymousPatientProfileDTO;
 import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
 import com.myvitalmate.app.userProfile.dto.PatientProfileUpdateDTO;
 import com.myvitalmate.app.userProfile.entity.Adresse;
@@ -19,6 +20,8 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.stereotype.Service;
 
 import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
 
 @Service
 @Transactional
@@ -69,6 +72,19 @@ public class PatientService {
         patientProfilerepository.save(patient);
     }
 
+    public void createAnonymousPatientProfile(AnonymousPatientProfileDTO dto) {
+        UUID anonymousId = getAnonymousId();
+
+        Optional<PatientProfile> existing = patientProfilerepository.findByAnonymousUuid(anonymousId);
+        if (existing.isPresent()) {
+            throw new ValidationException("Anonymous profile already exists");
+        }
+
+        PatientProfile patient = new PatientProfile();
+        patient.setAnonymousUuid(anonymousId);
+        patientProfilerepository.save(patient);
+    }
+
     public List<PatientProfileDTO> viewAllPatients() {
         List<PatientProfile> patients = patientProfilerepository.findAll();
         if (patients.isEmpty()) {
@@ -85,9 +101,15 @@ public class PatientService {
     }
 
     public List<PatientProfileDTO> viewMyPatients() {
-        User currentUser = getCurrentUser();
-        List<PatientProfile> patients = patientProfilerepository.findByUser(currentUser);
-        return patientMapper.toDtoList(patients);
+        try {
+            User currentUser = getCurrentUser();
+            List<PatientProfile> patients = patientProfilerepository.findByUser(currentUser);
+            return patientMapper.toDtoList(patients);
+        } catch (UsernameNotFoundException e) {
+            UUID anonymousId = getAnonymousId();
+            Optional<PatientProfile> patient = patientProfilerepository.findByAnonymousUuid(anonymousId);
+            return patient.map(p -> List.of(patientMapper.toDto(p))).orElse(List.of());
+        }
     }
 
     @Transactional
@@ -141,5 +163,15 @@ public class PatientService {
         patientProfilerepository.save(patient);
     }
 
+    private UUID getAnonymousId() {
+        Authentication authentication = SecurityContextHolder.getContext().getAuthentication();
+        String username = authentication.getName();
+
+        if (username.startsWith("anonymous_")) {
+            return UUID.fromString(username.substring(10));
+        }
+
+        throw new RuntimeException("Not an anonymous user");
+    }
 
 }

@@ -7,6 +7,7 @@ import jakarta.persistence.*;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Entity
 public class NutrientLogEntity {
@@ -14,6 +15,10 @@ public class NutrientLogEntity {
     @Id
     @GeneratedValue(strategy = GenerationType.IDENTITY)
     private Long id;
+
+    //for not registered user
+    @Column(nullable = true)
+    private UUID anonymousPatientId;
 
     private LocalDate logDate;
 
@@ -45,6 +50,14 @@ public class NutrientLogEntity {
 
     public void setPatient(PatientProfile patient) {
         this.patient = patient;
+    }
+
+    public UUID getAnonymousPatient() {
+        return anonymousPatientId;
+    }
+
+    public void setAnonymousPatientId(UUID anonymousPatientId) {
+        this.anonymousPatientId = anonymousPatientId;
     }
 
     public List<FoodEntryEntity> getFoodEntries() {

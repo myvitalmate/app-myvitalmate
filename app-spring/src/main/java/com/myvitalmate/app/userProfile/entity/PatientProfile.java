@@ -1,8 +1,12 @@
 package com.myvitalmate.app.userProfile.entity;
 
+import com.myvitalmate.app.userProfile.dto.AnonymousPatientProfileDTO;
 import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
+import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Table;
+
+import java.util.UUID;
 
 @Entity
 @Table(name = "Patient")
@@ -12,6 +16,9 @@ public class PatientProfile extends Profile {
     private String currentWeight;
     private String goals;
     private String sickness;
+
+    @Column(name = "anonymous_uuid")
+    private UUID anonymousUuid;
 
     public PatientProfile() {
         // JPA requires a no-arg constructor
@@ -28,6 +35,10 @@ public class PatientProfile extends Profile {
         this.currentWeight = dto.currentWeight();
         this.goals = dto.goals();
         this.sickness = dto.sickness();
+    }
+
+    public PatientProfile(AnonymousPatientProfileDTO dto) {
+        this.anonymousUuid = dto.uuid();
     }
 
     public String getDietOrientation() {
@@ -60,5 +71,13 @@ public class PatientProfile extends Profile {
 
     public void setSickness(String sickness) {
         this.sickness = sickness;
+    }
+
+    public UUID getAnonymousUuid() {
+        return anonymousUuid;
+    }
+
+    public void setAnonymousUuid(UUID anonymousUuid) {
+        this.anonymousUuid = anonymousUuid;
     }
 }

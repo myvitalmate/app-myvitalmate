@@ -10,7 +10,7 @@ import {ScrollArea} from "@/components/ui/scroll-area"
 
 const BASE_URL = import.meta.env.VITE_BACKEND_URL
 
-type UserType = "dietitian" | "patient"
+type UserType = "dietitian" | "patient" | "anonyous_patient"
 
 interface Profile {
     id: number
@@ -53,7 +53,6 @@ type FormData = {
     sickness?: string
 }
 
-// Enhanced helper function to extract name from email with number filtering
 const extractNameFromEmail = (email: string): { firstName: string, lastName: string } => {
     const defaultResult = {firstName: "", lastName: ""};
 
@@ -61,7 +60,6 @@ const extractNameFromEmail = (email: string): { firstName: string, lastName: str
         return defaultResult;
     }
 
-    // Get the part before @
     const beforeAt = email.split('@')[0];
 
     // Helper function to clean names (remove numbers and capitalize)
@@ -181,7 +179,6 @@ const Profile = () => {
         setActiveView("view");
         setEditingProfile(null);
 
-        // Get email from token and extract name
         const token = localStorage.getItem('token');
         let email = "";
         let firstName = "";
@@ -328,6 +325,12 @@ const Profile = () => {
         return Object.keys(newErrors).length === 0
     }
     const handleDelete = async (id: number, profileType: "dietitian" | "patient") => {
+        if (userRole === 'ANONYMOUS_PATIENT') {
+            setResponseMessage("You have to be registered via email to be able to use this feature");
+            setMessageType("error");
+            return;
+        }
+
         try {
             const response = await fetch(`${BASE_URL}/${profileType}s/delete?id=${id}`, {
                 method: "DELETE",
@@ -642,10 +645,14 @@ const Profile = () => {
                                                     <div className="flex items-start justify-between gap-3">
                                                         <div className="space-y-1">
                                                             <h4 className="font-medium leading-none">
-                                                                {dietitian.firstName} {dietitian.lastName}
+                                                                {dietitian.firstName || dietitian.lastName
+                                                                    ? `${dietitian.firstName || ''} ${dietitian.lastName || ''}`.trim()
+                                                                    : 'Anonymous User'
+                                                                }
                                                             </h4>
-                                                            <div
-                                                                className="text-sm text-muted-foreground">{dietitian.contact.email}</div>
+                                                            <div className="text-sm text-muted-foreground">
+                                                                {dietitian.contact?.email || 'No email provided'}
+                                                            </div>
                                                             <div className="flex flex-wrap gap-2 pt-1">
                                                                 {dietitian.specialty && (
                                                                     <span
@@ -662,6 +669,7 @@ const Profile = () => {
                                                                 variant="outline"
                                                                 size="sm"
                                                                 onClick={() => handleEdit(dietitian)}
+                                                                className={userRole === 'ANONYMOUS_PATIENT' ? 'opacity-50' : ''}
                                                             >
                                                                 Edit
                                                             </Button>
@@ -669,6 +677,7 @@ const Profile = () => {
                                                                 variant="destructive"
                                                                 size="sm"
                                                                 onClick={() => handleDelete(dietitian.id, "dietitian")}
+                                                                className={userRole === 'ANONYMOUS_PATIENT' ? 'opacity-50' : ''}
                                                             >
                                                                 Delete
                                                             </Button>
@@ -713,10 +722,14 @@ const Profile = () => {
                                                     <div className="flex items-start justify-between gap-3">
                                                         <div className="space-y-1">
                                                             <h4 className="font-medium leading-none">
-                                                                {patient.firstName} {patient.lastName}
+                                                                {patient.firstName || patient.lastName
+                                                                    ? `${patient.firstName || ''} ${patient.lastName || ''}`.trim()
+                                                                    : 'Anonymous User'
+                                                                }
                                                             </h4>
-                                                            <div
-                                                                className="text-sm text-muted-foreground">{patient.contact.email}</div>
+                                                            <div className="text-sm text-muted-foreground">
+                                                                {patient.contact?.email || 'No email provided'}
+                                                            </div>
                                                             <div className="flex flex-wrap gap-2 pt-1">
                                                                 {patient.dietOrientation && (
                                                                     <span
@@ -737,6 +750,7 @@ const Profile = () => {
                                                                 variant="outline"
                                                                 size="sm"
                                                                 onClick={() => handleEdit(patient)}
+                                                                className={userRole === 'ANONYMOUS_PATIENT' ? 'opacity-50' : ''}
                                                             >
                                                                 Edit
                                                             </Button>
@@ -744,6 +758,7 @@ const Profile = () => {
                                                                 variant="destructive"
                                                                 size="sm"
                                                                 onClick={() => handleDelete(patient.id, "patient")}
+                                                                className={userRole === 'ANONYMOUS_PATIENT' ? 'opacity-50' : ''}
                                                             >
                                                                 Delete
                                                             </Button>
@@ -771,7 +786,6 @@ const Profile = () => {
                             <div className="text-sm text-muted-foreground">
                                 {editingProfile ? "Update the" : "Fill in the"} details {editingProfile ? "to update the" : "to create a new"} profile
                             </div>
-                            {/* Only show user type selector when creating a new profile */}
                             {!editingProfile && userRole !== 'PATIENT' && (
                                 <div className="pt-2">
                                     <Select value={userType} onValueChange={(value: UserType) => setUserType(value)}>

@@ -1,5 +1,6 @@
 package com.myvitalmate.app.userProfile.controller;
 
+import com.myvitalmate.app.userProfile.dto.AnonymousPatientProfileDTO;
 import com.myvitalmate.app.userProfile.dto.PatientProfileDTO;
 import com.myvitalmate.app.userProfile.dto.PatientProfileUpdateDTO;
 import com.myvitalmate.app.userProfile.service.PatientService;
@@ -41,6 +42,12 @@ public class PatientController {
             @RequestBody PatientProfileUpdateDTO dto
     ) {
         patientService.updatePatientProfile(id, dto);
+        return ResponseEntity.ok().build();
+    }
+
+    @PostMapping("/create/anonymous")
+    public ResponseEntity<Void> createAnonymousPatientProfile(@RequestBody AnonymousPatientProfileDTO dto) {
+        patientService.createAnonymousPatientProfile(dto);
         return ResponseEntity.ok().build();
     }
 }

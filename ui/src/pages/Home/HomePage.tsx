@@ -5,7 +5,7 @@ import {Input} from "@/components/ui/input.tsx";
 const BASE_URL = import.meta.env.VITE_BACKEND_URL;
 
 export const fetchResponse = async (searchQuery: string) => {
-    const response = await fetch(`${BASE_URL}/health/check/?query=${encodeURIComponent(searchQuery)}`);
+    const response = await fetch(`${BASE_URL}/health/check/?query=${searchQuery}`);
     const data = await response.json();
     return data.healthResponse;
 };
@@ -20,16 +20,22 @@ const Home = () => {
     };
 
     return (
-        <div className="flex flex-col w-full max-w-sm items-center space-y-4 mx-auto pt-4 pl-4 pr-4">
-            <h1>Welcome to My Vital Mate</h1>
-            <div className="flex w-full items-center space-x-2">
+        <div className="flex flex-col w-full max-w-sm items-center space-y-10 mx-auto p-4">
+            <h1 className="text-xl font-bold">Welcome to My Vital Mate</h1>
+            <h2 className="text-sm font-bold text-red-800"> Note: The backend may take up to 60 seconds to respond on first request due to cold starts.</h2>
+            <div className="flex w-full items-center space-x-5">
                 <Input
                     type="text"
                     value={searchQuery}
                     onChange={(e) => setSearchQuery(e.target.value)}
                     placeholder="Test backend"
+                    className = "border-3 rounded-lg"
                 />
-                <Button variant={"default"} onClick={handleBackendCall}>Search</Button>
+                <Button
+                    onClick={handleBackendCall}
+                    className="border-2 rounded-lg"
+                >
+                    Search</Button>
             </div>
             <p>{result}</p>
         </div>
