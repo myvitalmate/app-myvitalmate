@@ -3,7 +3,7 @@
     <option name="ALTERNATIVE_JRE_PATH" value="azul-23" />
     <option name="ALTERNATIVE_JRE_PATH_ENABLED" value="true" />
     <option name="MAIN_CLASS_NAME" value="com.myvitalmate.app.AppSpringApplication" />
-    <module name="app_myvitalmate" />
+    <module name="app-spring.main" />
     <option name="WORKING_DIRECTORY" value="$PROJECT_DIR$/app-spring" />
     <extension name="coverage">
       <pattern>
